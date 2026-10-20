@@ -74,11 +74,9 @@ These domains are deliberately excluded because established Rust libraries alrea
 | Random-number generation and sampling | [rand](https://docs.rs/rand/latest/rand/) |
 | Statistical distributions | [statrs](https://docs.rs/statrs/latest/statrs/), [rand_distr](https://docs.rs/rand_distr/latest/rand_distr/) |
 
-## References and testing
+## Contributing
 
-The public [GSL 2.8 definitions and documented behavior](https://www.gnu.org/software/gsl/doc/html/) are the behavior reference. Implementations and tests are independently written from mathematical definitions and established numerical methods, without copying or translating GSL implementation code or its coefficient tables. Short mathematical provenance notes live beside the Rust source.
-
-Unit, integration, and documentation tests run through Cargo with expected values stored directly in Rust, justified floating-point tolerances, and explicit edge cases. Tests require no external scripts, numerical fixtures, GSL, or C/C++ numerical compiler.
+Contributions are welcome from the community. Please follow the guidelines in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Licensing status
 
