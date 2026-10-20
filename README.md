@@ -14,19 +14,19 @@ The workspace uses safe Rust, forbids unsafe code in every library, and verifies
 | | Regularized incomplete gamma | `incomplete_gamma::{p, q}` |
 | | Regularized incomplete beta | `incomplete_beta::{regularized, complement}` |
 | | Cylindrical Bessel J/Y/I/K | `bessel::{j0, j1, jn, y0, y1, yn, i0, i1, i_n, k0, k1, kn}` and `_scaled` I/K forms |
-| `gsl-oxide-integration` | Gauss-Kronrod quadrature | Planned |
-| | Adaptive finite-interval integration | Planned |
-| | Breakpoint-aware integration | Planned |
-| | Infinite-interval integration | Planned |
-| | Integrable endpoint singularities | Planned |
+| `gsl-oxide-integration` | Gauss-Kronrod quadrature | Private Gauss 7 / Kronrod 15 kernel |
+| | Adaptive finite-interval integration | `integrate` |
+| | Breakpoint-aware integration | `integrate_with_breakpoints` |
+| | Infinite-interval integration | `integrate_upper_infinite`, `integrate_lower_infinite`, `integrate_infinite` |
+| | Integrable endpoint singularities | `integrate_singular` (tanh–sinh; logarithms and powers with exponent ≥ −1/2) |
 | `gsl-oxide-statistics` | Mean, variance, and standard deviation | Planned |
 | | Covariance and correlation | Planned |
 | | Weighted statistics | Planned |
 | | Streaming and mergeable statistics | Planned |
 
-Each library builds independently and has no dependencies, including on the other workspace crates. Integration and statistics currently expose no numerical routines. Planned functionality is not yet available; unlisted GSL functionality is unsupported. See the repository's [implementation plan](https://github.com/jware-solutions/gsl-oxide/blob/HEAD/IMPLEMENTATION_PLAN.md) for the work breakdown.
+Each library builds independently and has no dependencies, including on the other workspace crates. Statistics currently exposes no numerical routines. Planned functionality is not yet available; unlisted GSL functionality is unsupported. See the repository's [implementation plan](https://github.com/jware-solutions/gsl-oxide/blob/HEAD/IMPLEMENTATION_PLAN.md) for the work breakdown.
 
-See the Rust API documentation for supported arguments, numerical limits, and error behavior. Build and open it locally with `cargo doc -p gsl-oxide-special --open`.
+See the Rust API documentation for supported arguments, numerical limits, and error behavior. Build and open it locally with `cargo doc -p gsl-oxide-special --open` or `cargo doc -p gsl-oxide-integration --open`.
 
 ## Getting started
 
@@ -37,6 +37,7 @@ Crates have not been published. Until publication, point your application's `Car
 ```toml
 [dependencies]
 gsl-oxide-special = { path = "../gsl-oxide/crates/special" }
+gsl-oxide-integration = { path = "../gsl-oxide/crates/integration" }
 ```
 
 ```rust
@@ -59,7 +60,20 @@ fn main() -> Result<(), gsl_oxide_special::Error> {
 }
 ```
 
-Applications will be able to depend on each published crate separately. From this checkout, run `cargo test --workspace`, or `cargo test -p gsl-oxide-special` for a single crate. `cargo check -p gsl-oxide-integration` and `cargo check -p gsl-oxide-statistics` independently check the remaining libraries.
+```rust
+use gsl_oxide_integration::integrate;
+
+fn main() -> Result<(), gsl_oxide_integration::Error> {
+    let (area, estimated_error) = integrate(
+        f64::sin, 0.0, std::f64::consts::PI, 1e-12, 1e-12, 10_000,
+    )?;
+    assert!((area - 2.0).abs() < 1e-12);
+    assert!(estimated_error <= 2e-12);
+    Ok(())
+}
+```
+
+Applications will be able to depend on each published crate separately. From this checkout, run `cargo test --workspace`, or `cargo test -p gsl-oxide-special` / `cargo test -p gsl-oxide-integration` for one crate. Each library can also be checked independently with `cargo check -p <package>`.
 
 ## Alternatives for modules outside this workspace
 

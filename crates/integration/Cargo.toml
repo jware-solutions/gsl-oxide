@@ -1,6 +1,6 @@
 [package]
 name = "gsl-oxide-integration"
-description = "Native Rust numerical integration crate for the planned GSL subset; no routines yet"
+description = "Independent safe Rust adaptive quadrature for finite, infinite, and endpoint-singular integrals"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
