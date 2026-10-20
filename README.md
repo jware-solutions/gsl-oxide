@@ -68,6 +68,8 @@ The public [GSL 2.8 definitions and documented behavior](https://www.gnu.org/sof
 
 Unit, integration, and documentation tests run through Cargo with expected values stored directly in Rust, justified floating-point tolerances, and explicit edge cases. Tests require no external scripts, numerical fixtures, GSL, or C/C++ numerical compiler.
 
+Reference cases specify both absolute and relative tolerances. Finite comparisons validate the tolerances and use `abs(actual - expected) <= max(abs_tol, rel_tol * abs(expected))`; NaN, infinity, and signed-zero behavior use direct assertions, including zero sign bits. Deterministic identity checks supplement the reference values, with explicit coverage of subnormals and adjacent representable branch-boundary inputs.
+
 ## Licensing status
 
 The final license for the new Rust implementation is still under consideration. MIT is preferred, contingent on confirming the necessary rights and provenance; no MIT-licensed release has been declared. Independent development preserves that option, and Cargo license metadata remains unset pending a final decision.
