@@ -8,12 +8,12 @@ The workspace uses safe Rust, forbids unsafe code in every library, and verifies
 
 | Crate | Family | Status |
 | --- | --- | --- |
-| `gsl-oxide-special` | Error functions | `error_functions::erf` implemented and tested; `erfc` planned |
-| | Gamma and log gamma | Planned |
-| | Beta and log beta | Planned |
-| | Regularized incomplete gamma | Planned |
-| | Regularized incomplete beta | Planned |
-| | Bessel J/Y/I/K, including scaled variants | Planned |
+| `gsl-oxide-special` | Error functions | `error_functions::{erf, erfc}` |
+| | Gamma and signed log gamma | `gamma::{gamma, ln_gamma}` |
+| | Beta and log beta | `beta::{beta, ln_beta}` for positive finite shapes |
+| | Regularized incomplete gamma | `incomplete_gamma::{p, q}` |
+| | Regularized incomplete beta | `incomplete_beta::{regularized, complement}` |
+| | Cylindrical Bessel J/Y/I/K | `bessel::{j0, j1, jn, y0, y1, yn, i0, i1, i_n, k0, k1, kn}` and `_scaled` I/K forms |
 | `gsl-oxide-integration` | Gauss-Kronrod quadrature | Planned |
 | | Adaptive finite-interval integration | Planned |
 | | Breakpoint-aware integration | Planned |
@@ -26,7 +26,7 @@ The workspace uses safe Rust, forbids unsafe code in every library, and verifies
 
 Each library builds independently and has no dependencies, including on the other workspace crates. Integration and statistics currently expose no numerical routines. Planned functionality is not yet available; unlisted GSL functionality is unsupported. See the repository's [implementation plan](https://github.com/jware-solutions/gsl-oxide/blob/HEAD/IMPLEMENTATION_PLAN.md) for the work breakdown.
 
-APIs use standard Rust types and conventional mathematical names. `erf(f64) -> f64` uses ordinary floating-point semantics: NaN propagates, infinities return their signed unit limits, and signed zero is preserved. Checked operations will use `Result` when explicit failure handling is needed.
+See the Rust API documentation for supported arguments, numerical limits, and error behavior. Build and open it locally with `cargo doc -p gsl-oxide-special --open`.
 
 ## Getting started
 
@@ -44,6 +44,18 @@ use gsl_oxide_special::error_functions::erf;
 
 fn main() {
     assert!((erf(1.0) - 0.8427007929497149).abs() < 2.0e-15);
+}
+```
+
+```rust
+use gsl_oxide_special::{bessel, gamma, incomplete_gamma};
+
+fn main() -> Result<(), gsl_oxide_special::Error> {
+    let (log_abs, sign) = gamma::ln_gamma(-0.5)?;
+    assert!(log_abs > 1.0 && sign == -1);
+    assert!(incomplete_gamma::q(1.0, 100.0)? > 0.0);
+    assert!(bessel::i0_scaled(1000.0)? > 0.01);
+    Ok(())
 }
 ```
 
@@ -67,8 +79,6 @@ These domains are deliberately excluded because established Rust libraries alrea
 The public [GSL 2.8 definitions and documented behavior](https://www.gnu.org/software/gsl/doc/html/) are the behavior reference. Implementations and tests are independently written from mathematical definitions and established numerical methods, without copying or translating GSL implementation code or its coefficient tables. Short mathematical provenance notes live beside the Rust source.
 
 Unit, integration, and documentation tests run through Cargo with expected values stored directly in Rust, justified floating-point tolerances, and explicit edge cases. Tests require no external scripts, numerical fixtures, GSL, or C/C++ numerical compiler.
-
-Reference cases specify both absolute and relative tolerances. Finite comparisons validate the tolerances and use `abs(actual - expected) <= max(abs_tol, rel_tol * abs(expected))`; NaN, infinity, and signed-zero behavior use direct assertions, including zero sign bits. Deterministic identity checks supplement the reference values, with explicit coverage of subnormals and adjacent representable branch-boundary inputs.
 
 ## Licensing status
 

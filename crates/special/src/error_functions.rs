@@ -58,3 +58,44 @@ pub fn erf(x: f64) -> f64 {
     let value = magnitude * (std::f64::consts::FRAC_2_SQRT_PI * (-squared).exp() * sum);
     value.min(1.0).copysign(x)
 }
+
+/// Returns `erfc(x) = 2/sqrt(pi) * integral_x^infinity exp(-t*t) dt`.
+///
+/// All real f64 inputs are supported. NaN propagates; `+infinity` returns
+/// positive zero, `-infinity` returns 2, and either signed zero returns 1.
+/// Positive tails are computed directly, through subnormal values to rounded
+/// underflow; large negative arguments round to 2. No overflow is possible.
+/// Uses a convergent Laplace fraction ([DLMF 7.9.1](https://dlmf.nist.gov/7.9.E1))
+/// for `|x|>=1`; this is not the saturated `erf` complement.
+///
+/// ```
+/// use gsl_oxide_special::error_functions::erfc;
+/// assert!(erfc(10.0) > 2e-45 && erfc(10.0) < 3e-45);
+/// ```
+pub fn erfc(x: f64) -> f64 {
+    if x.is_nan() {
+        return x;
+    }
+    let a = x.abs();
+    let tail = if a < 1.0 {
+        1.0 - erf(a)
+    } else if a >= 28.0 {
+        // Below half a subnormal step, checked before squaring huge inputs.
+        0.0
+    } else {
+        // erfc(a)=exp(-a²)/sqrt(pi)/(a+(1/2)/(a+1/(a+...))).
+        // 512 levels at a>=1 give a truncation error far below f64 rounding;
+        // positive denominators avoid breakdown. Evaluate the exponential
+        // after the reciprocal so the subnormal tail rounds only once.
+        let mut denominator = a;
+        for k in (1..=512).rev() {
+            denominator = a + (f64::from(k) / 2.0) / denominator;
+        }
+        (-a * a - std::f64::consts::PI.ln() / 2.0 - denominator.ln()).exp()
+    };
+    if x < 0.0 {
+        2.0 - tail
+    } else {
+        tail
+    }
+}
