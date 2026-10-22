@@ -1,6 +1,6 @@
 [package]
 name = "gsl-oxide-statistics"
-description = "Native Rust statistics crate for the planned GSL subset; no routines yet"
+description = "Independent safe Rust slice, weighted, and mergeable streaming statistics"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

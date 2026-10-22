@@ -19,14 +19,18 @@ The workspace uses safe Rust, forbids unsafe code in every library, and verifies
 | | Breakpoint-aware integration | `integrate_with_breakpoints` |
 | | Infinite-interval integration | `integrate_upper_infinite`, `integrate_lower_infinite`, `integrate_infinite` |
 | | Integrable endpoint singularities | `integrate_singular` (tanh–sinh; logarithms and powers with exponent ≥ −1/2) |
-| `gsl-oxide-statistics` | Mean, variance, and standard deviation | Planned |
-| | Covariance and correlation | Planned |
-| | Weighted statistics | Planned |
-| | Streaming and mergeable statistics | Planned |
+| `gsl-oxide-statistics` | Mean, variance, and standard deviation | `mean`, `population_variance`, `sample_variance`, `population_standard_deviation`, `sample_standard_deviation` |
+| | Covariance and correlation | `sample_covariance`, `correlation` (Pearson) |
+| | Weighted statistics | `weighted_mean`, `weighted_population_variance`, `weighted_reliability_variance` |
+| | Streaming and mergeable statistics | `RunningStatistics` with checked `push`, `merge`, queries, and reset |
 
-Each library builds independently and has no dependencies, including on the other workspace crates. Statistics currently exposes no numerical routines. Planned functionality is not yet available; unlisted GSL functionality is unsupported. See the repository's [implementation plan](https://github.com/jware-solutions/gsl-oxide/blob/HEAD/IMPLEMENTATION_PLAN.md) for the work breakdown.
+Each library builds independently and has no dependencies, including on the other workspace crates. Unlisted GSL functionality is unsupported. Statistics quantiles, medians, histograms, higher moments, regression, rank correlations, moving windows, streaming covariance, and weighted streaming remain outside the implemented subset. See the repository's [implementation plan](https://github.com/jware-solutions/gsl-oxide/blob/HEAD/IMPLEMENTATION_PLAN.md) for the work breakdown.
 
-See the Rust API documentation for supported arguments, numerical limits, and error behavior. Build and open it locally with `cargo doc -p gsl-oxide-special --open` or `cargo doc -p gsl-oxide-integration --open`.
+See the Rust API documentation for supported arguments, numerical limits, and error behavior. Build and open it locally with `cargo doc -p gsl-oxide-special --open`, `cargo doc -p gsl-oxide-integration --open`, or `cargo doc -p gsl-oxide-statistics --open`.
+
+Statistics use checked `Result<f64, Error>` returns and allocation-free borrowed slices. Population variance divides the centered moment by `n`; sample variance and covariance use `n - 1`. Weighted population variance divides by total weight `W`; reliability variance uses GSL's `W - sum(w*w)/W` correction, including for integer weights. Finite nonnegative weights are normalized by their maximum; zero weight removes even a non-finite observation. Each positive normalized weight must be at least `f64::MIN_POSITIVE`. Correlation requires nonconstant inputs and uses scaled centered products.
+
+Compensated sums and centered scaling avoid raw-moment cancellation and unnecessary overflow. Successful results are finite; empty inputs, undefined estimators, non-finite participating observations, unsupported weight ratios, and numerical/count overflow return errors. Ordinary floating-point underflow is allowed. Standard-deviation queries require a representable variance even when the mathematical deviation would fit. Streaming additionally requires representable mean differences and an unnormalized centered sum of squares; merge order affects rounding. Counts above `2^53` incur rounding when converted for numerical ratios. These are numerical algorithms, without a correct-rounding or cross-platform bitwise guarantee.
 
 ## Getting started
 
@@ -38,6 +42,7 @@ Crates have not been published. Until publication, point your application's `Car
 [dependencies]
 gsl-oxide-special = { path = "../gsl-oxide/crates/special" }
 gsl-oxide-integration = { path = "../gsl-oxide/crates/integration" }
+gsl-oxide-statistics = { path = "../gsl-oxide/crates/statistics" }
 ```
 
 ```rust
@@ -73,7 +78,25 @@ fn main() -> Result<(), gsl_oxide_integration::Error> {
 }
 ```
 
-Applications will be able to depend on each published crate separately. From this checkout, run `cargo test --workspace`, or `cargo test -p gsl-oxide-special` / `cargo test -p gsl-oxide-integration` for one crate. Each library can also be checked independently with `cargo check -p <package>`.
+```rust
+use gsl_oxide_statistics::{mean, sample_variance, weighted_reliability_variance, RunningStatistics};
+
+fn main() -> Result<(), gsl_oxide_statistics::Error> {
+    assert_eq!(mean(&[1., 2., 3., 4., 5.])?, 3.);
+    assert_eq!(sample_variance(&[1., 2., 3., 4., 5.])?, 2.5);
+    assert!((weighted_reliability_variance(&[1., 4.], &[1., 3.])? - 4.5).abs() < 1e-14);
+    let mut left = RunningStatistics::new();
+    left.push(1.)?;
+    let mut right = RunningStatistics::new();
+    for x in [2., 3., 4., 5.] { right.push(x)?; }
+    left.merge(&right)?;
+    assert_eq!(left.count(), 5);
+    assert_eq!(left.sample_variance()?, 2.5);
+    Ok(())
+}
+```
+
+Applications will be able to depend on each published crate separately. From this checkout, run `cargo test --workspace`, or `cargo test -p gsl-oxide-special`, `cargo test -p gsl-oxide-integration`, or `cargo test -p gsl-oxide-statistics` for one crate. Each library can also be checked independently with `cargo check -p <package>`. Statistics examples are checked with `cargo test -p gsl-oxide-statistics --doc`.
 
 ## Alternatives for modules outside this workspace
 
