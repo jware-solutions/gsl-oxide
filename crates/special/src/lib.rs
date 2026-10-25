@@ -1,7 +1,8 @@
 //! Safe Rust implementations of selected GSL special functions.
 //!
 //! Error functions, gamma/beta, regularized incomplete gamma/beta, and
-//! integer-order cylindrical Bessel functions form the implemented subset.
+//! integer-order cylindrical Bessel functions, real exponential integrals,
+//! Legendre polynomials and generalized Laguerre polynomials form the subset.
 //! Each module documents its supported domains and numerical limits.
 //!
 //! ```
@@ -17,15 +18,33 @@
 //! assert!(bessel::i0_scaled(1000.0)? > 0.01);
 //! # Ok::<(), gsl_oxide_special::Error>(())
 //! ```
+//!
+//! ```
+//! use gsl_oxide_special::{exponential_integrals as expint, laguerre, legendre};
+//! assert!((expint::e1(1.0)? - 0.21938393439552027).abs() < 2e-15);
+//! assert_eq!(expint::e2(0.0)?, 1.0);
+//! assert!((expint::ei(-1.0)? + expint::e1(1.0)?).abs() < 2e-15);
+//! // Scaled integrals remain useful when the unscaled results underflow/overflow.
+//! assert!(expint::e1_scaled(1000.0)? > 0.0009);
+//! assert!(expint::e2_scaled(1000.0)? > 0.0009);
+//! assert!(expint::ei_scaled(1000.0)? > 0.001);
+//! assert_eq!(legendre::p(3, 0.5)?, -0.4375);
+//! assert_eq!(laguerre::generalized(2, 0.5, 1.0)?, -0.125);
+//! assert_eq!(laguerre::generalized(2, 0.0, 0.0)?, 1.0);
+//! # Ok::<(), gsl_oxide_special::Error>(())
+//! ```
 
 #![forbid(unsafe_code)]
 
 pub mod bessel;
 pub mod beta;
 pub mod error_functions;
+pub mod exponential_integrals;
 pub mod gamma;
 pub mod incomplete_beta;
 pub mod incomplete_gamma;
+pub mod laguerre;
+pub mod legendre;
 
 /// Failure of a checked special-function evaluation.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

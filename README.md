@@ -14,6 +14,9 @@ The workspace uses safe Rust, forbids unsafe code in every library, and verifies
 | | Regularized incomplete gamma | `incomplete_gamma::{p, q}` |
 | | Regularized incomplete beta | `incomplete_beta::{regularized, complement}` |
 | | Cylindrical Bessel J/Y/I/K | `bessel::{j0, j1, jn, y0, y1, yn, i0, i1, i_n, k0, k1, kn}` and `_scaled` I/K forms |
+| | Real exponential integrals | `exponential_integrals::{e1, e2, ei, e1_scaled, e2_scaled, ei_scaled}` |
+| | Ordinary Legendre polynomials | `legendre::p` |
+| | Generalized Laguerre polynomials | `laguerre::generalized` |
 | `gsl-oxide-integration` | Gauss-Kronrod quadrature | Private Gauss 7 / Kronrod 15 kernel |
 | | Adaptive finite-interval integration | `integrate` |
 | | Breakpoint-aware integration | `integrate_with_breakpoints` |
