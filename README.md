@@ -6,38 +6,13 @@ The workspace uses safe Rust, forbids unsafe code in every library, and verifies
 
 ## Crates and coverage
 
-| Crate | Family | Status |
-| --- | --- | --- |
-| `gsl-oxide-special` | Error functions | `error_functions::{erf, erfc}` |
-| | Gamma and signed log gamma | `gamma::{gamma, ln_gamma}` |
-| | Beta and log beta | `beta::{beta, ln_beta}` for positive finite shapes |
-| | Regularized incomplete gamma | `incomplete_gamma::{p, q}` |
-| | Regularized incomplete beta | `incomplete_beta::{regularized, complement}` |
-| | Cylindrical Bessel J/Y/I/K | `bessel::{j0, j1, jn, y0, y1, yn, i0, i1, i_n, k0, k1, kn}` and `_scaled` I/K forms |
-| | Real exponential integrals | `exponential_integrals::{e1, e2, ei, e1_scaled, e2_scaled, ei_scaled}` |
-| | Ordinary Legendre polynomials | `legendre::p` |
-| | Generalized Laguerre polynomials | `laguerre::generalized` |
-| `gsl-oxide-integration` | Gauss-Kronrod quadrature | Private Gauss 7 / Kronrod 15 kernel |
-| | Adaptive finite-interval integration | `integrate` |
-| | Breakpoint-aware integration | `integrate_with_breakpoints` |
-| | Infinite-interval integration | `integrate_upper_infinite`, `integrate_lower_infinite`, `integrate_infinite` |
-| | Integrable endpoint singularities | `integrate_singular` (tanh–sinh; logarithms and powers with exponent ≥ −1/2) |
-| `gsl-oxide-statistics` | Mean, variance, and standard deviation | `mean`, `population_variance`, `sample_variance`, `population_standard_deviation`, `sample_standard_deviation` |
-| | Covariance and correlation | `sample_covariance`, `correlation` (Pearson) |
-| | Weighted statistics | `weighted_mean`, `weighted_population_variance`, `weighted_reliability_variance` |
-| | Streaming and mergeable statistics | `RunningStatistics` with checked `push`, `merge`, queries, and reset |
+| Crate | Supported functionality |
+| --- | --- |
+| `gsl-oxide-special` | Error functions; gamma and beta functions, including logarithms and regularized incomplete forms; integer-order Bessel J/Y/I/K functions with scaled I/K variants; real exponential integrals with scaled variants; Legendre and generalized Laguerre polynomials. |
+| `gsl-oxide-integration` | Adaptive integration over finite and infinite intervals, user-supplied breakpoints, and endpoint singularities involving logarithms or powers with exponent ≥ −1/2. |
+| `gsl-oxide-statistics` | Mean, population/sample variance and standard deviation, sample covariance, Pearson correlation, weighted mean and variance, and streaming statistics with merge support. |
 
-Each library builds independently and has no dependencies, including on the other workspace crates. Unlisted GSL functionality is unsupported. Statistics quantiles, medians, histograms, higher moments, regression, rank correlations, moving windows, streaming covariance, and weighted streaming remain outside the implemented subset. See the repository's [implementation plan](https://github.com/jware-solutions/gsl-oxide/blob/HEAD/IMPLEMENTATION_PLAN.md) for the work breakdown.
-
-See the Rust API documentation for supported arguments, numerical limits, and error behavior. Build and open it locally with `cargo doc -p gsl-oxide-special --open`, `cargo doc -p gsl-oxide-integration --open`, or `cargo doc -p gsl-oxide-statistics --open`.
-
-Special functions use `f64`; `erf`/`erfc` return floating-point values directly (including NaN and infinity limits), while the other families return checked results. Gamma accepts finite nonpole real arguments; beta requires positive finite shapes. Incomplete gamma supports `0 < a <= 1e6`, `x >= 0` including positive infinity; incomplete beta supports finite `0 < a,b <= 1e6`, `0 <= x <= 1`. Complementary tails are computed directly where needed, but may underflow. The largest balanced incomplete-beta shapes can lose about `1e-9` absolute accuracy. Bessel orders are nonnegative integers `0..=1000`; finite arguments satisfy `|x| <= 1e6` for J/I and `0 < x <= 1e6` for Y/K, including scaled variants. Y/K reject zero. Scaled I/K avoid unscaled overflow/underflow; relative accuracy deteriorates near J/Y zeros and recurrence roundoff grows with order. Unsupported ranges and convergence failures are explicit errors.
-
-Integration returns `(integral, estimated_absolute_error)` inside `Result`. Estimates are numerical diagnostics, not rigorous bounds for arbitrary callbacks; finite sampling can miss narrow features. Breakpoints help with known interior difficulties. Tolerances are finite and nonnegative, with at least one positive; pure relative requests require at least `64 * f64::EPSILON`. All segments share a hard original-callback evaluation budget. Infinite integration requires independently convergent tails and sufficiently regular transformed integrands; principal values and specialized oscillatory methods are unsupported. Endpoint integration supports interior-smooth functions with logarithms or algebraic endpoint powers `distance^alpha`, `alpha >= -1/2`, and never evaluates endpoints. Rounded callback arguments near nonzero endpoints can limit inverse-square-root accuracy to roughly `1e-7` times the integral's scale. Unresolved tails, stagnation, non-finite samples, and exhausted budgets return errors.
-
-Statistics use checked `Result<f64, Error>` returns and allocation-free borrowed slices. Population variance divides the centered moment by `n`; sample variance and covariance use `n - 1`. Weighted population variance divides by total weight `W`; reliability variance uses GSL's `W - sum(w*w)/W` correction, including for integer weights. Finite nonnegative weights are normalized by their maximum; zero weight removes even a non-finite observation. Each positive normalized weight must be at least `f64::MIN_POSITIVE`. Correlation requires nonconstant inputs and uses scaled centered products.
-
-Compensated sums and centered scaling avoid raw-moment cancellation and unnecessary overflow. Successful results are finite; empty inputs, undefined estimators, non-finite participating observations, unsupported weight ratios, and numerical/count overflow return errors. Ordinary floating-point underflow is allowed. Standard-deviation queries require a representable variance even when the mathematical deviation would fit. Streaming additionally requires representable mean differences and an unnormalized centered sum of squares; merge order affects rounding. Counts above `2^53` incur rounding when converted for numerical ratios. These are numerical algorithms, without a correct-rounding or cross-platform bitwise guarantee.
+Unlisted GSL functionality is unsupported. Consult the Rust API documentation for supported arguments, numerical limits, and error behavior. Generate it locally with `cargo doc --workspace --no-deps`.
 
 ## Getting started
 
