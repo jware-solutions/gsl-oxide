@@ -1,6 +1,6 @@
 [package]
 name = "gsl-oxide-integration"
-description = "Independent safe Rust adaptive quadrature for finite, infinite, and endpoint-singular integrals"
+description = "Safe Rust adaptive quadrature for finite, infinite, and endpoint-singular integrals"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -8,6 +8,7 @@ authors.workspace = true
 repository.workspace = true
 readme.workspace = true
 include.workspace = true
+license.workspace = true
 
 [lints]
 workspace = true

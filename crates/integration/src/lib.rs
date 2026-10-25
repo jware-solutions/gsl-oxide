@@ -1,4 +1,4 @@
-//! Independent safe Rust quadrature for finite intervals, breakpoints, infinite
+//! Safe Rust quadrature for finite intervals, breakpoints, infinite
 //! intervals, and integrable endpoint singularities.
 //!
 //! All functions return `(integral, estimated_absolute_error)`. Estimates are

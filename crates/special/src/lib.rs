@@ -1,4 +1,22 @@
-//! Independent, safe Rust implementations of selected GSL special functions.
+//! Safe Rust implementations of selected GSL special functions.
+//!
+//! Error functions, gamma/beta, regularized incomplete gamma/beta, and
+//! integer-order cylindrical Bessel functions form the implemented subset.
+//! Each module documents its supported domains and numerical limits.
+//!
+//! ```
+//! use gsl_oxide_special::error_functions::erf;
+//! assert!((erf(1.0) - 0.8427007929497149).abs() < 2.0e-15);
+//! ```
+//!
+//! ```
+//! use gsl_oxide_special::{bessel, gamma, incomplete_gamma};
+//! let (log_abs, sign) = gamma::ln_gamma(-0.5)?;
+//! assert!(log_abs > 1.0 && sign == -1);
+//! assert!(incomplete_gamma::q(1.0, 100.0)? > 0.0);
+//! assert!(bessel::i0_scaled(1000.0)? > 0.01);
+//! # Ok::<(), gsl_oxide_special::Error>(())
+//! ```
 
 #![forbid(unsafe_code)]
 

@@ -9,8 +9,8 @@ rust-version = "1.85"
 authors = ["Genaro Camele"]
 repository = "https://github.com/jware-solutions/gsl-oxide"
 readme = "README.md"
-include = ["Cargo.toml", "src/**", "tests/**"]
-# The final license for the new Rust implementation is still undecided.
+include = ["Cargo.toml", "LICENSE", "src/**", "tests/**"]
+license = "GPL-3.0-or-later"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

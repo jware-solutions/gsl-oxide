@@ -1,4 +1,4 @@
-//! Private embedded rule; the coefficients are independently derived numbers.
+//! Private embedded rule with mathematically reproducible coefficients.
 
 use crate::{finite, Error, Sum};
 
@@ -7,11 +7,10 @@ use crate::{finite, Error, Sum};
 // integral_-1^1 P7(x)*E8(x)*x^k dx = 0, k=1,3,5,7. Exact rational moments give
 // E8 = x^8 - (36/17)x^6 + (7794/5491)x^4 - (202548/653429)x^2
 //      + 52932681/4854324041.
-// Independently calculated here during development using exact rational
-// elimination, 80-decimal fixed-point root bisection, then integration of the
-// Lagrange basis polynomials. Rounded to f64 below. No external coefficient
-// table or implementation was used. Gauss nodes are roots of P7; added nodes
-// are roots of E8. Moment and polynomial tests below check this construction.
+// Rounded f64 nodes and weights follow from exact rational elimination,
+// root bisection, and integration of Lagrange basis polynomials.
+// Gauss nodes are roots of P7; added nodes are roots of E8. Moment and
+// polynomial tests below check this construction.
 // Mathematical basis: https://dlmf.nist.gov/3.5.iv and /3.5.v;
 // Embedded extension: https://www.gnu.org/software/gsl/doc/html/integration.html
 // ("Integrands without weight functions").

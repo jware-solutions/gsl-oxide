@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
+jobs:
+  style:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - run: rustup toolchain install stable --profile minimal --component rustfmt --component clippy
+      - run: cargo +stable fmt --all --check
+      - run: cargo +stable clippy --workspace --all-targets --locked -- -D warnings
+
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            toolchain: stable
+          - os: windows-2022
+            toolchain: stable
+          - os: macos-15 # Native ARM64
+            toolchain: stable
+          - os: ubuntu-24.04
+            toolchain: 1.85.0
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    env:
+      RUSTDOCFLAGS: -D warnings
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - run: rustup toolchain install ${{ matrix.toolchain }} --profile minimal
+      - run: rustc +${{ matrix.toolchain }} -vV
+      - run: cargo +${{ matrix.toolchain }} test --workspace --locked
+      - run: cargo +${{ matrix.toolchain }} test --workspace --release --locked
+      - run: cargo +${{ matrix.toolchain }} test --workspace --doc --locked
+      - run: cargo +${{ matrix.toolchain }} test --workspace --doc --release --locked
+      - run: cargo +${{ matrix.toolchain }} doc --workspace --no-deps --locked
+      - run: cargo +${{ matrix.toolchain }} build -p gsl-oxide-special --locked
+      - run: cargo +${{ matrix.toolchain }} build -p gsl-oxide-integration --locked
+      - run: cargo +${{ matrix.toolchain }} build -p gsl-oxide-statistics --locked
+      - run: cargo +stable package --workspace --list --locked
+        if: matrix.os == 'ubuntu-24.04' && matrix.toolchain == 'stable'
+      - run: cargo +stable package --workspace --locked
+        if: matrix.os == 'ubuntu-24.04' && matrix.toolchain == 'stable'

@@ -1,4 +1,4 @@
-//! Independent, allocation-free statistics on borrowed `f64` slices and streams.
+//! Allocation-free statistics on borrowed `f64` slices and streams.
 //!
 //! Variances use the computed sample mean: population variance divides the
 //! centered sum of squares by `n`, sample variance by `n - 1`. These are distinct
