@@ -10,7 +10,7 @@ The workspace uses safe Rust, forbids unsafe code in every library, and verifies
 | --- | --- |
 | `gsl-oxide-special` | Error functions; gamma and beta functions, including logarithms and regularized incomplete forms; integer-order Bessel J/Y/I/K functions with scaled I/K variants; real exponential integrals with scaled variants; Legendre and generalized Laguerre polynomials. |
 | `gsl-oxide-integration` | Adaptive integration over finite and infinite intervals, user-supplied breakpoints, and endpoint singularities involving logarithms or powers with exponent ≥ −1/2. |
-| `gsl-oxide-statistics` | Mean, population/sample variance and standard deviation, sample covariance, Pearson correlation, weighted mean and variance, and streaming statistics with merge support. |
+| `gsl-oxide-statistics` | Mean, population/sample variance and standard deviation, sample covariance, Pearson and Spearman correlation, weighted mean and variance, and streaming statistics with merge support. |
 
 Unlisted GSL functionality is unsupported. Consult the Rust API documentation for supported arguments, numerical limits, and error behavior. Generate it locally with `cargo doc --workspace --no-deps`.
 
@@ -113,6 +113,7 @@ These domains are deliberately excluded because established Rust libraries alrea
 | Optimization | [argmin](https://docs.rs/argmin/latest/argmin/) |
 | Random-number generation and sampling | [rand](https://docs.rs/rand/latest/rand/) |
 | Statistical distributions | [statrs](https://docs.rs/statrs/latest/statrs/), [rand_distr](https://docs.rs/rand_distr/latest/rand_distr/) |
+| Kendall rank correlation | [kendalls](https://docs.rs/kendalls/latest/kendalls/) |
 
 ## Contributing
 
