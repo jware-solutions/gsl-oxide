@@ -1,4 +1,4 @@
-name: Release to crates.io
+name: Release to crates.io and GitHub
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: Validate without uploading
+        description: Validate without publishing crates, tags, or GitHub releases
         type: boolean
         default: true
 
@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
-      contents: read
+      contents: write
       pull-requests: read
     env:
       GIT_TOKEN: ${{ github.token }}
@@ -43,9 +43,9 @@ jobs:
       - uses: taiki-e/install-action@a4d3f3f761dcd95cce1b72cb61cb6d1963438177 # v2.87.30
         with:
           tool: release-plz@0.3.174
-      - name: Dry-run all unpublished crates
+      - name: Dry-run crate and GitHub releases
         run: release-plz release --dry-run
-      - name: Publish all unpublished crates
+      - name: Publish crates and create GitHub releases
         if: ${{ github.event_name == 'push' || !inputs.dry_run }}
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
