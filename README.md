@@ -14,6 +14,8 @@ The workspace uses safe Rust, forbids unsafe code in every library, and verifies
 
 Unlisted GSL functionality is unsupported. Consult the Rust API documentation for supported arguments, numerical limits, and error behavior. Generate it locally with `cargo doc --workspace --no-deps`.
 
+See [GSL function name equivalencies](FUNCTION_EQUIVALENCIES.md) for a reference when transitioning from GSL. The guide maps GSL functions to this workspace's Rust API and lists previous Rust names that were replaced to make their purpose clearer.
+
 ## Getting started
 
 Requires **Rust 1.85.0 or newer**, using the Rust 2021 edition and Cargo resolver 2. The virtual workspace shares package metadata, lints, `Cargo.lock`, and the root `target/` directory. Ordinary platform linker/toolchain requirements still apply; GSL and a C/C++ numerical harness are unnecessary.
@@ -50,9 +52,9 @@ fn main() {
 use gsl_oxide_special::{bessel, gamma, incomplete_gamma};
 
 fn main() -> Result<(), gsl_oxide_special::Error> {
-    let (log_abs, sign) = gamma::ln_gamma(-0.5)?;
+    let (log_abs, sign) = gamma::ln_abs_gamma_with_sign(-0.5)?;
     assert!(log_abs > 1.0 && sign == -1);
-    assert!(incomplete_gamma::q(1.0, 100.0)? > 0.0);
+    assert!(incomplete_gamma::upper_regularized(1.0, 100.0)? > 0.0);
     assert!(bessel::i0_scaled(1000.0)? > 0.01);
     Ok(())
 }

@@ -22,7 +22,7 @@
 // to contiguous f64 slices and Rust assertions; added independent contract tests.
 mod support;
 
-use gsl_oxide_statistics::{spearman, Error};
+use gsl_oxide_statistics::{spearman_correlation, Error};
 use support::{close, positive_zero};
 
 #[test]
@@ -36,7 +36,7 @@ fn gsl_floating_point_regression() {
         0.1856, 0.1688, 0.1512,
     ];
     close(
-        spearman(&x, &y).unwrap(),
+        spearman_correlation(&x, &y).unwrap(),
         -0.160_439_560_439_560_45,
         0.,
         1e-10,
@@ -53,7 +53,12 @@ fn gsl_integer_regression_with_ties() {
         19., 20., 22., 24., 10., 25., 20., 22., 21., 23., 20., 10., 12., 14., 12., 20., 22., 24.,
         23., 17.,
     ];
-    close(spearman(&x, &y).unwrap(), 0.644239670474577, 0., 1e-10);
+    close(
+        spearman_correlation(&x, &y).unwrap(),
+        0.644239670474577,
+        0.,
+        1e-10,
+    );
 }
 
 #[test]
@@ -66,30 +71,45 @@ fn average_ranks_for_ties() {
         (&[1., 2., 3., 3.][..], &[1., 2., 2., 3.][..], 5. / 6.),
         (&[-0., 0., 1., 2.][..], &[1., 2., 2., 3.][..], 5. / 6.),
     ] {
-        close(spearman(x, y).unwrap(), expected, 5e-16, 5e-16);
-        close(spearman(y, x).unwrap(), expected, 5e-16, 5e-16);
+        close(spearman_correlation(x, y).unwrap(), expected, 5e-16, 5e-16);
+        close(spearman_correlation(y, x).unwrap(), expected, 5e-16, 5e-16);
     }
-    positive_zero(spearman(&[1., 1., 2., 2.], &[1., 2., 1., 2.]).unwrap());
+    positive_zero(spearman_correlation(&[1., 1., 2., 2.], &[1., 2., 1., 2.]).unwrap());
 }
 
 #[test]
 fn monotonic_association_and_extreme_values() {
     let x = [4.0_f64, -2., 8., 0., 1.];
     let cubic = x.map(|v| v.powi(3));
-    close(spearman(&x, &cubic).unwrap(), 1., 0., 5e-16);
-    close(spearman(&x, &cubic.map(|v| -v)).unwrap(), -1., 0., 5e-16);
+    close(spearman_correlation(&x, &cubic).unwrap(), 1., 0., 5e-16);
+    close(
+        spearman_correlation(&x, &cubic.map(|v| -v)).unwrap(),
+        -1.,
+        0.,
+        5e-16,
+    );
     for y in [[10., 20.], [20., 10.]] {
         let expected = if y[0] < y[1] { 1. } else { -1. };
-        close(spearman(&[1., 2.], &y).unwrap(), expected, 0., 5e-16);
+        close(
+            spearman_correlation(&[1., 2.], &y).unwrap(),
+            expected,
+            0.,
+            5e-16,
+        );
     }
     let tiny = f64::from_bits(1);
     let extreme = [-f64::MAX, -1., -tiny, -0., 0., tiny, 1., f64::MAX];
     let labels = [-4., -3., -2., 0., -0., 2., 3., 4.];
-    close(spearman(&extreme, &labels).unwrap(), 1., 0., 5e-16);
+    close(
+        spearman_correlation(&extreme, &labels).unwrap(),
+        1.,
+        0.,
+        5e-16,
+    );
     // Adjacent representable values must not be treated as ties.
     let next = f64::from_bits(1.0_f64.to_bits() + 1);
     close(
-        spearman(&[1., next, 2.], &[1., 2., 3.]).unwrap(),
+        spearman_correlation(&[1., next, 2.], &[1., 2., 3.]).unwrap(),
         1.,
         0.,
         5e-16,
@@ -102,14 +122,24 @@ fn pairing_order_symmetry_and_input_preservation() {
     let y = [6., 1., 7., 2., 3., 1., 5.];
     let before_x = x.map(f64::to_bits);
     let before_y = y.map(f64::to_bits);
-    let expected = spearman(&x, &y).unwrap();
-    close(spearman(&y, &x).unwrap(), expected, 5e-16, 5e-16);
+    let expected = spearman_correlation(&x, &y).unwrap();
+    close(
+        spearman_correlation(&y, &x).unwrap(),
+        expected,
+        5e-16,
+        5e-16,
+    );
     for offset in 0..x.len() {
         let mut px = x;
         let mut py = y;
         px.rotate_left(offset);
         py.rotate_left(offset);
-        close(spearman(&px, &py).unwrap(), expected, 5e-16, 5e-16);
+        close(
+            spearman_correlation(&px, &py).unwrap(),
+            expected,
+            5e-16,
+            5e-16,
+        );
     }
     assert_eq!(x.map(f64::to_bits), before_x);
     assert_eq!(y.map(f64::to_bits), before_y);
@@ -125,7 +155,7 @@ fn untied_permutations_match_rank_difference_formula() {
             let squared_differences: f64 =
                 x.iter().zip(y.iter()).map(|(a, b)| (a - b).powi(2)).sum();
             let expected = 1. - squared_differences / 20.;
-            close(spearman(&x, y).unwrap(), expected, 5e-16, 5e-16);
+            close(spearman_correlation(&x, y).unwrap(), expected, 5e-16, 5e-16);
         } else {
             for i in start..y.len() {
                 y.swap(start, i);
@@ -139,26 +169,41 @@ fn untied_permutations_match_rank_difference_formula() {
 
 #[test]
 fn invalid_input_contracts() {
-    assert_eq!(spearman(&[], &[1.]), Err(Error::LengthMismatch));
-    assert_eq!(spearman(&[1., 2.], &[1.]), Err(Error::LengthMismatch));
-    assert_eq!(spearman(&[], &[]), Err(Error::InsufficientData));
-    assert_eq!(spearman(&[1.], &[2.]), Err(Error::InsufficientData));
+    assert_eq!(spearman_correlation(&[], &[1.]), Err(Error::LengthMismatch));
+    assert_eq!(
+        spearman_correlation(&[1., 2.], &[1.]),
+        Err(Error::LengthMismatch)
+    );
+    assert_eq!(spearman_correlation(&[], &[]), Err(Error::InsufficientData));
+    assert_eq!(
+        spearman_correlation(&[1.], &[2.]),
+        Err(Error::InsufficientData)
+    );
     for constant in [[1., 1., 1.], [-0., 0., -0.], [f64::MAX; 3]] {
-        assert_eq!(spearman(&constant, &[1., 2., 3.]), Err(Error::ZeroVariance));
-        assert_eq!(spearman(&[1., 2., 3.], &constant), Err(Error::ZeroVariance));
-        assert_eq!(spearman(&constant, &constant), Err(Error::ZeroVariance));
+        assert_eq!(
+            spearman_correlation(&constant, &[1., 2., 3.]),
+            Err(Error::ZeroVariance)
+        );
+        assert_eq!(
+            spearman_correlation(&[1., 2., 3.], &constant),
+            Err(Error::ZeroVariance)
+        );
+        assert_eq!(
+            spearman_correlation(&constant, &constant),
+            Err(Error::ZeroVariance)
+        );
     }
     for bad in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY] {
         assert_eq!(
-            spearman(&[1., bad, 3.], &[1., 2., 3.]),
+            spearman_correlation(&[1., bad, 3.], &[1., 2., 3.]),
             Err(Error::NonFiniteData)
         );
         assert_eq!(
-            spearman(&[1., 2., 3.], &[1., bad, 3.]),
+            spearman_correlation(&[1., 2., 3.], &[1., bad, 3.]),
             Err(Error::NonFiniteData)
         );
         assert_eq!(
-            spearman(&[1.; 3], &[1., bad, 3.]),
+            spearman_correlation(&[1.; 3], &[1., bad, 3.]),
             Err(Error::NonFiniteData)
         );
     }

@@ -135,23 +135,23 @@ fn checked(p: f64, q: f64) -> Result<(f64, f64), Error> {
 /// Large transitions use a cancellation-free logarithmic prefactor and up
 /// to 32768 terms.
 /// See [DLMF §8.25](https://dlmf.nist.gov/8.25).
-pub fn p(a: f64, x: f64) -> Result<f64, Error> {
+pub fn lower_regularized(a: f64, x: f64) -> Result<f64, Error> {
     Ok(tails(a, x, LIMIT)?.0)
 }
 
 /// Returns `Q(a,x)=integral_x^infinity t^(a-1)exp(-t)dt / Gamma(a)`.
 ///
-/// Has [`p`]'s domain, restrictions and errors, with exact values 1 at zero
-/// and 0 at infinity. Computes the upper small tail directly; underflow
+/// Has [`lower_regularized`]'s domain, restrictions and errors, with exact values
+/// 1 at zero and 0 at infinity. Computes the upper small tail directly; underflow
 /// returns positive zero. See [DLMF §8.25](https://dlmf.nist.gov/8.25).
 ///
 /// ```
-/// use gsl_oxide_special::incomplete_gamma::{p, q};
-/// assert!(q(1.0, 100.0)? > 0.0);
-/// assert_eq!(p(1.0, 100.0)?, 1.0);
+/// use gsl_oxide_special::incomplete_gamma::{lower_regularized, upper_regularized};
+/// assert!(upper_regularized(1.0, 100.0)? > 0.0);
+/// assert_eq!(lower_regularized(1.0, 100.0)?, 1.0);
 /// # Ok::<(), gsl_oxide_special::Error>(())
 /// ```
-pub fn q(a: f64, x: f64) -> Result<f64, Error> {
+pub fn upper_regularized(a: f64, x: f64) -> Result<f64, Error> {
     Ok(tails(a, x, LIMIT)?.1)
 }
 

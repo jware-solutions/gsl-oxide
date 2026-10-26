@@ -12,9 +12,9 @@
 //!
 //! ```
 //! use gsl_oxide_special::{bessel, gamma, incomplete_gamma};
-//! let (log_abs, sign) = gamma::ln_gamma(-0.5)?;
+//! let (log_abs, sign) = gamma::ln_abs_gamma_with_sign(-0.5)?;
 //! assert!(log_abs > 1.0 && sign == -1);
-//! assert!(incomplete_gamma::q(1.0, 100.0)? > 0.0);
+//! assert!(incomplete_gamma::upper_regularized(1.0, 100.0)? > 0.0);
 //! assert!(bessel::i0_scaled(1000.0)? > 0.01);
 //! # Ok::<(), gsl_oxide_special::Error>(())
 //! ```
@@ -28,9 +28,9 @@
 //! assert!(expint::e1_scaled(1000.0)? > 0.0009);
 //! assert!(expint::e2_scaled(1000.0)? > 0.0009);
 //! assert!(expint::ei_scaled(1000.0)? > 0.001);
-//! assert_eq!(legendre::p(3, 0.5)?, -0.4375);
-//! assert_eq!(laguerre::generalized(2, 0.5, 1.0)?, -0.125);
-//! assert_eq!(laguerre::generalized(2, 0.0, 0.0)?, 1.0);
+//! assert_eq!(legendre::polynomial(3, 0.5)?, -0.4375);
+//! assert_eq!(laguerre::generalized_polynomial(2, 0.5, 1.0)?, -0.125);
+//! assert_eq!(laguerre::generalized_polynomial(2, 0.0, 0.0)?, 1.0);
 //! # Ok::<(), gsl_oxide_special::Error>(())
 //! ```
 

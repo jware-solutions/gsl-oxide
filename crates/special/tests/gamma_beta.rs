@@ -1,7 +1,7 @@
 //! Gamma and beta public contracts and numerical anchors.
 use gsl_oxide_special::{
     beta::{beta, ln_beta},
-    gamma::{gamma, ln_gamma},
+    gamma::{gamma, ln_abs_gamma_with_sign},
     Error,
 };
 mod support;
@@ -28,7 +28,7 @@ fn published_gamma_and_log_values() {
         (1e30, 6.807755278982137e31, 1),
         (1e300, 6.897755278982137e302, 1),
     ] {
-        let (v, sign) = ln_gamma(x).unwrap();
+        let (v, sign) = ln_abs_gamma_with_sign(x).unwrap();
         assert_eq!(sign, s);
         assert_close(v, l, 3e-14, 5e-15, "log gamma anchor");
     }
@@ -45,7 +45,7 @@ fn published_gamma_and_log_values() {
                 1.0 - 0.5772156649015329
             };
             assert_close(
-                ln_gamma(x).unwrap().0,
+                ln_abs_gamma_with_sign(x).unwrap().0,
                 slope * (x - base),
                 2e-31,
                 4e-15,
@@ -102,16 +102,16 @@ fn gamma_reflection_poles_and_range() {
         f64::NEG_INFINITY,
     ] {
         assert_eq!(gamma(x), Err(Error::Domain));
-        assert_eq!(ln_gamma(x), Err(Error::Domain));
+        assert_eq!(ln_abs_gamma_with_sign(x), Err(Error::Domain));
     }
     assert!(gamma(171.5).unwrap().is_finite());
     assert!(gamma(171.624).unwrap().is_finite());
     assert_eq!(gamma(171.625), Err(Error::Overflow));
     assert_eq!(gamma(172.0), Err(Error::Overflow));
-    assert!(ln_gamma(172.0).unwrap().0 > 710.0);
-    assert_eq!(ln_gamma(f64::MAX), Err(Error::Overflow));
+    assert!(ln_abs_gamma_with_sign(172.0).unwrap().0 > 710.0);
+    assert_eq!(ln_abs_gamma_with_sign(f64::MAX), Err(Error::Overflow));
     assert_eq!(gamma(-180.5).unwrap().to_bits(), (-0.0_f64).to_bits());
-    assert!(ln_gamma(-180.5).unwrap().0 < -745.0);
+    assert!(ln_abs_gamma_with_sign(-180.5).unwrap().0 < -745.0);
     // Half-integer recurrence from Gamma(-1/2)=-2sqrt(pi), evaluated by
     // successive division. The final reference is subnormal; 171 divisions
     // allow 4e-13 relative, with no absolute tolerance accepting zero.
@@ -124,7 +124,7 @@ fn gamma_reflection_poles_and_range() {
     assert_close(subnormal, half, 0.0, 4e-13, "subnormal gamma half-integer");
     assert!(gamma(1e-300).unwrap() > 9.99e299);
     assert_close(
-        ln_gamma(-f64::from_bits(1)).unwrap().0,
+        ln_abs_gamma_with_sign(-f64::from_bits(1)).unwrap().0,
         -f64::from_bits(1).ln(),
         0.0,
         2e-15,

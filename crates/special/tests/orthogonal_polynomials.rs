@@ -1,5 +1,5 @@
 //! Polynomial anchors from explicit formulas, with identities as supplements.
-use gsl_oxide_special::{laguerre::generalized, legendre, Error};
+use gsl_oxide_special::{laguerre::generalized_polynomial, legendre, Error};
 mod support;
 use support::assert_close;
 
@@ -7,24 +7,24 @@ use support::assert_close;
 fn legendre_low_orders_endpoints_and_central_values() {
     // DLMF 18.5.16, exact polynomial coefficients and special values.
     for x in [-1.0_f64, -0.75, -0.1, -0.0, 0.0, 0.25, 0.5, 0.9, 1.0] {
-        assert_eq!(legendre::p(0, x), Ok(1.0));
-        assert_eq!(legendre::p(1, x), Ok(x));
+        assert_eq!(legendre::polynomial(0, x), Ok(1.0));
+        assert_eq!(legendre::polynomial(1, x), Ok(x));
         assert_close(
-            legendre::p(2, x).unwrap(),
+            legendre::polynomial(2, x).unwrap(),
             (3.0 * x * x - 1.0) / 2.0,
             3e-16,
             2e-15,
             "P2",
         );
         assert_close(
-            legendre::p(3, x).unwrap(),
+            legendre::polynomial(3, x).unwrap(),
             x * (5.0 * x * x - 3.0) / 2.0,
             3e-16,
             2e-15,
             "P3",
         );
         assert_close(
-            legendre::p(4, x).unwrap(),
+            legendre::polynomial(4, x).unwrap(),
             (35.0 * x.powi(4) - 30.0 * x * x + 3.0) / 8.0,
             5e-16,
             3e-15,
@@ -32,15 +32,18 @@ fn legendre_low_orders_endpoints_and_central_values() {
         );
     }
     for n in [0, 1, 2, 3, 99, 100, 999, 1000] {
-        assert_eq!(legendre::p(n, 1.0), Ok(1.0));
+        assert_eq!(legendre::polynomial(n, 1.0), Ok(1.0));
         assert_eq!(
-            legendre::p(n, -1.0),
+            legendre::polynomial(n, -1.0),
             Ok(if n % 2 == 0 { 1.0 } else { -1.0 })
         );
         if n % 2 == 1 {
-            assert_eq!(legendre::p(n, 0.0).unwrap().to_bits(), 0.0_f64.to_bits());
             assert_eq!(
-                legendre::p(n, -0.0).unwrap().to_bits(),
+                legendre::polynomial(n, 0.0).unwrap().to_bits(),
+                0.0_f64.to_bits()
+            );
+            assert_eq!(
+                legendre::polynomial(n, -0.0).unwrap().to_bits(),
                 (-0.0_f64).to_bits()
             );
         }
@@ -54,7 +57,7 @@ fn legendre_low_orders_endpoints_and_central_values() {
         (1000, 0.0252250181783608),
     ] {
         assert_close(
-            legendre::p(n, 0.0).unwrap(),
+            legendre::polynomial(n, 0.0).unwrap(),
             expected,
             0.0,
             5e-15,
@@ -89,7 +92,7 @@ fn legendre_high_degrees_and_difficult_regions() {
         ] {
             let expected = legendre_explicit(n, x);
             assert_close(
-                legendre::p(n, x).unwrap(),
+                legendre::polynomial(n, x).unwrap(),
                 expected,
                 8e-15,
                 8e-14,
@@ -97,7 +100,7 @@ fn legendre_high_degrees_and_difficult_regions() {
             );
             let parity = if n % 2 == 0 { 1.0 } else { -1.0 };
             assert_close(
-                legendre::p(n, -x).unwrap(),
+                legendre::polynomial(n, -x).unwrap(),
                 parity * expected,
                 8e-15,
                 8e-14,
@@ -109,7 +112,7 @@ fn legendre_high_degrees_and_difficult_regions() {
     for (n, root) in [(2, (1.0_f64 / 3.0).sqrt()), (3, (3.0_f64 / 5.0).sqrt())] {
         for bits in [root.to_bits() - 1, root.to_bits(), root.to_bits() + 1] {
             assert_close(
-                legendre::p(n, f64::from_bits(bits)).unwrap(),
+                legendre::polynomial(n, f64::from_bits(bits)).unwrap(),
                 0.0,
                 8e-16,
                 0.0,
@@ -131,16 +134,19 @@ fn legendre_high_degrees_and_difficult_regions() {
         // P998(0)=-1000/999*P1000(0), from the binomial closed form.
         let expected = -1000.0 * 0.0252250181783608 * x;
         assert_close(
-            legendre::p(999, x).unwrap(),
+            legendre::polynomial(999, x).unwrap(),
             expected,
             f64::from_bits(1),
             8e-15,
             "tiny odd polynomial",
         );
-        assert!(legendre::p(999, x).unwrap() < 0.0);
-        assert_eq!(legendre::p(999, -x).unwrap(), -legendre::p(999, x).unwrap());
+        assert!(legendre::polynomial(999, x).unwrap() < 0.0);
+        assert_eq!(
+            legendre::polynomial(999, -x).unwrap(),
+            -legendre::polynomial(999, x).unwrap()
+        );
         assert_close(
-            legendre::p(1000, x).unwrap(),
+            legendre::polynomial(1000, x).unwrap(),
             0.0252250181783608,
             0.0,
             8e-15,
@@ -161,23 +167,24 @@ fn legendre_domains_and_supplemental_identities() {
             f64::from_bits(1.0_f64.to_bits() + 1),
             -f64::from_bits(1.0_f64.to_bits() + 1),
         ] {
-            assert_eq!(legendre::p(n, x), Err(Error::Domain));
+            assert_eq!(legendre::polynomial(n, x), Err(Error::Domain));
         }
     }
     for n in [1001, u32::MAX] {
-        assert_eq!(legendre::p(n, 0.0), Err(Error::UnsupportedRange));
-        assert_eq!(legendre::p(n, 1.0), Err(Error::UnsupportedRange));
+        assert_eq!(legendre::polynomial(n, 0.0), Err(Error::UnsupportedRange));
+        assert_eq!(legendre::polynomial(n, 1.0), Err(Error::UnsupportedRange));
     }
     for x in [0.1_f64, 0.5, 0.9, 0.99] {
         for n in [1, 2, 10, 99, 500, 999] {
-            let pn = legendre::p(n, x).unwrap();
+            let pn = legendre::polynomial(n, x).unwrap();
             assert_eq!(
-                legendre::p(n, -x).unwrap(),
+                legendre::polynomial(n, -x).unwrap(),
                 if n % 2 == 0 { pn } else { -pn }
             );
             let k = f64::from(n);
-            let residual = (k + 1.0) * legendre::p(n + 1, x).unwrap() - (2.0 * k + 1.0) * x * pn
-                + k * legendre::p(n - 1, x).unwrap();
+            let residual = (k + 1.0) * legendre::polynomial(n + 1, x).unwrap()
+                - (2.0 * k + 1.0) * x * pn
+                + k * legendre::polynomial(n - 1, x).unwrap();
             assert_close(residual, 0.0, 6e-13, 0.0, "degree recurrence");
         }
     }
@@ -189,7 +196,7 @@ fn legendre_domains_and_supplemental_identities() {
         // Independent explicit expression is well conditioned at degree 10.
         let x = f64::from_bits(bits);
         assert_close(
-            legendre::p(10, x).unwrap(),
+            legendre::polynomial(10, x).unwrap(),
             legendre_explicit(10, x),
             6e-14,
             0.0,
@@ -203,18 +210,18 @@ fn laguerre_independent_values_and_low_degree_formulas() {
     // Published examples, no external oracle execution:
     // https://mpmath.readthedocs.io/en/latest/functions/orthogonal.html#laguerre-polynomials
     assert_close(
-        generalized(5, 0.0, 0.25).unwrap(),
+        generalized_polynomial(5, 0.0, 0.25).unwrap(),
         0.037_263_997_395_833_33,
         2e-16,
         2e-15,
         "ordinary L5",
     );
-    assert_eq!(generalized(2, 0.0, 10000.0), Ok(49980001.0));
+    assert_eq!(generalized_polynomial(2, 0.0, 10000.0), Ok(49980001.0));
     // DLMF 18.5.17_5: exact low-order formulas, including noninteger alpha.
     for alpha in [-0.75_f64, -0.5, 0.0, 0.5, 2.5, 1000.0] {
         for x in [-10000.0_f64, -10.0, -0.0, 0.0, 0.25, 1.0, 10.0, 10000.0] {
-            assert_eq!(generalized(0, alpha, x), Ok(1.0));
-            assert_eq!(generalized(1, alpha, x), Ok(alpha + 1.0 - x));
+            assert_eq!(generalized_polynomial(0, alpha, x), Ok(1.0));
+            assert_eq!(generalized_polynomial(1, alpha, x), Ok(alpha + 1.0 - x));
             let l2 = 0.5 * x * x - (alpha + 2.0) * x + 0.5 * (alpha + 1.0) * (alpha + 2.0);
             // Integer coefficients of 6*L3 avoid rounding each 1/6 term
             // before cancellation (all these inputs are dyadic rationals).
@@ -222,14 +229,14 @@ fn laguerre_independent_values_and_low_degree_formulas() {
                 + (alpha + 1.0) * (alpha + 2.0) * (alpha + 3.0))
                 / 6.0;
             assert_close(
-                generalized(2, alpha, x).unwrap(),
+                generalized_polynomial(2, alpha, x).unwrap(),
                 l2,
                 4e-15,
                 3e-15,
                 "generalized L2",
             );
             assert_close(
-                generalized(3, alpha, x).unwrap(),
+                generalized_polynomial(3, alpha, x).unwrap(),
                 l3,
                 4e-15,
                 3e-15,
@@ -239,16 +246,16 @@ fn laguerre_independent_values_and_low_degree_formulas() {
     }
     // At x=0, L_n^alpha(0)=binomial(n+alpha,n), DLMF 18.5.12.
     for n in [2, 10, 100, 999, 1000] {
-        assert_eq!(generalized(n, 0.0, 0.0), Ok(1.0));
+        assert_eq!(generalized_polynomial(n, 0.0, 0.0), Ok(1.0));
         assert_close(
-            generalized(n, 1.0, -0.0).unwrap(),
+            generalized_polynomial(n, 1.0, -0.0).unwrap(),
             f64::from(n + 1),
             0.0,
             1e-14, // up to 1000 rounded factors in the zero-argument product
             "binomial alpha=1",
         );
         assert_close(
-            generalized(n, 2.0, 0.0).unwrap(),
+            generalized_polynomial(n, 2.0, 0.0).unwrap(),
             f64::from(n + 1) * f64::from(n + 2) / 2.0,
             0.0,
             1e-14,
@@ -296,7 +303,7 @@ fn laguerre_high_degrees_near_roots_and_alpha_boundary() {
     ] {
         let expected = laguerre_explicit(n, alpha, x);
         assert_close(
-            generalized(n, alpha, x).unwrap(),
+            generalized_polynomial(n, alpha, x).unwrap(),
             expected,
             absolute,
             relative,
@@ -310,14 +317,17 @@ fn laguerre_high_degrees_near_roots_and_alpha_boundary() {
         let expected = laguerre_explicit(n, 0.0, -1000.0);
         if expected.is_finite() {
             assert_close(
-                generalized(n, 0.0, -1000.0).unwrap(),
+                generalized_polynomial(n, 0.0, -1000.0).unwrap(),
                 expected,
                 0.0,
                 3e-13,
                 "Laguerre overflow boundary",
             );
         } else {
-            assert_eq!(generalized(n, 0.0, -1000.0), Err(Error::Overflow));
+            assert_eq!(
+                generalized_polynomial(n, 0.0, -1000.0),
+                Err(Error::Overflow)
+            );
         }
     }
     // L2^alpha roots = alpha+2 +/- sqrt(alpha+2), DLMF 18.5.17_5.
@@ -328,7 +338,7 @@ fn laguerre_high_degrees_near_roots_and_alpha_boundary() {
         ] {
             for bits in [root.to_bits() - 1, root.to_bits(), root.to_bits() + 1] {
                 assert_close(
-                    generalized(2, alpha, f64::from_bits(bits)).unwrap(),
+                    generalized_polynomial(2, alpha, f64::from_bits(bits)).unwrap(),
                     0.0,
                     4e-15,
                     0.0,
@@ -343,9 +353,9 @@ fn laguerre_high_degrees_near_roots_and_alpha_boundary() {
         f64::MIN_POSITIVE,
         -f64::MIN_POSITIVE,
     ] {
-        assert_eq!(generalized(1000, 0.0, x), Ok(1.0));
+        assert_eq!(generalized_polynomial(1000, 0.0, x), Ok(1.0));
         assert_close(
-            generalized(1000, near_minus_one, x).unwrap(),
+            generalized_polynomial(1000, near_minus_one, x).unwrap(),
             (near_minus_one + 1.0) / 1000.0,
             0.0,
             3e-12,
@@ -365,28 +375,43 @@ fn laguerre_domains_limits_overflow_and_recurrence() {
             -2.0,
             f64::from_bits((-1.0_f64).to_bits() + 1),
         ] {
-            assert_eq!(generalized(n, alpha, 0.0), Err(Error::Domain));
+            assert_eq!(generalized_polynomial(n, alpha, 0.0), Err(Error::Domain));
         }
         for x in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY] {
-            assert_eq!(generalized(n, 0.0, x), Err(Error::Domain));
+            assert_eq!(generalized_polynomial(n, 0.0, x), Err(Error::Domain));
         }
         assert_eq!(
-            generalized(n, f64::from_bits(1000.0_f64.to_bits() + 1), 0.0),
+            generalized_polynomial(n, f64::from_bits(1000.0_f64.to_bits() + 1), 0.0),
             Err(Error::UnsupportedRange)
         );
         for x in [
             f64::from_bits(10000.0_f64.to_bits() + 1),
             -f64::from_bits(10000.0_f64.to_bits() + 1),
         ] {
-            assert_eq!(generalized(n, 0.0, x), Err(Error::UnsupportedRange));
+            assert_eq!(
+                generalized_polynomial(n, 0.0, x),
+                Err(Error::UnsupportedRange)
+            );
         }
     }
     for n in [1001, u32::MAX] {
-        assert_eq!(generalized(n, 0.0, 0.0), Err(Error::UnsupportedRange));
+        assert_eq!(
+            generalized_polynomial(n, 0.0, 0.0),
+            Err(Error::UnsupportedRange)
+        );
     }
-    assert_eq!(generalized(1000, 1000.0, 0.0), Err(Error::Overflow));
-    assert_eq!(generalized(1000, 0.0, -10000.0), Err(Error::Overflow));
-    assert_eq!(generalized(1000, 0.0, 10000.0), Err(Error::Overflow));
+    assert_eq!(
+        generalized_polynomial(1000, 1000.0, 0.0),
+        Err(Error::Overflow)
+    );
+    assert_eq!(
+        generalized_polynomial(1000, 0.0, -10000.0),
+        Err(Error::Overflow)
+    );
+    assert_eq!(
+        generalized_polynomial(1000, 0.0, 10000.0),
+        Err(Error::Overflow)
+    );
     for magnitude in [1.0_f64, 10000.0] {
         for sign in [-1.0, 1.0] {
             // Adjacent inputs at the recurrence switch and finite range
@@ -398,12 +423,15 @@ fn laguerre_domains_limits_overflow_and_recurrence() {
             ] {
                 let x = sign * f64::from_bits(bits);
                 if x.abs() > 10000.0 {
-                    assert_eq!(generalized(2, 0.0, x), Err(Error::UnsupportedRange));
+                    assert_eq!(
+                        generalized_polynomial(2, 0.0, x),
+                        Err(Error::UnsupportedRange)
+                    );
                     continue;
                 }
                 let expected = (x * x - 4.0 * x + 2.0) / 2.0;
                 assert_close(
-                    generalized(2, 0.0, x).unwrap(),
+                    generalized_polynomial(2, 0.0, x).unwrap(),
                     expected,
                     5e-16,
                     3e-15,
@@ -416,9 +444,9 @@ fn laguerre_domains_limits_overflow_and_recurrence() {
         for x in [-1.0, 0.01, 0.25, 1.0, 100.0] {
             for n in [1, 2, 10, 99, 999] {
                 let k = f64::from(n);
-                let a = (k + 1.0) * generalized(n + 1, alpha, x).unwrap();
-                let b = (2.0 * k + alpha + 1.0 - x) * generalized(n, alpha, x).unwrap()
-                    - (k + alpha) * generalized(n - 1, alpha, x).unwrap();
+                let a = (k + 1.0) * generalized_polynomial(n + 1, alpha, x).unwrap();
+                let b = (2.0 * k + alpha + 1.0 - x) * generalized_polynomial(n, alpha, x).unwrap()
+                    - (k + alpha) * generalized_polynomial(n - 1, alpha, x).unwrap();
                 assert_close(a, b, 2e-12, 3e-13, "Laguerre recurrence");
             }
         }

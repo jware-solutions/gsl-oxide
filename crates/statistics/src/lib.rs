@@ -4,8 +4,9 @@
 //! centered sum of squares by `n`, sample variance by `n - 1`. These are distinct
 //! from variance about a known, fixed population mean. Standard deviations are
 //! square roots of the corresponding variances. Covariance uses `n - 1`;
-//! [`correlation`] is the centered, normalized Pearson coefficient; [`spearman`]
-//! applies it to ranks, averaging occupied positions for ties.
+//! [`pearson_correlation`] is the centered, normalized Pearson coefficient;
+//! [`spearman_correlation`] applies it to ranks, averaging occupied positions
+//! for ties.
 //!
 //! Every successful result is finite. Empty samples, insufficient degrees of
 //! freedom, and participating NaN/infinite observations are errors. Constants
@@ -23,8 +24,9 @@
 //! not require representable variances. Streaming has the additional internal
 //! range limits documented on [`RunningStatistics`]. Counts use checked `usize`
 //! arithmetic; ratios use `f64`, so counts above `2^53` can incur integer-conversion
-//! roundoff. Operations use O(1) auxiliary storage except [`spearman`], which
-//! allocates O(n) storage for ranking. No operation mutates samples.
+//! roundoff. Operations use O(1) auxiliary storage except
+//! [`spearman_correlation`], which allocates O(n) storage for ranking. No operation
+//! mutates samples.
 //!
 //! Weights are finite, nonnegative real reliability weights. Zero (including
 //! `-0.0`) removes an observation **before** validating its value. Positive
@@ -64,10 +66,10 @@ mod weighted;
 
 pub use running::RunningStatistics;
 pub use slice::{
-    correlation, mean, population_standard_deviation, population_variance, sample_covariance,
-    sample_standard_deviation, sample_variance,
+    mean, pearson_correlation, population_standard_deviation, population_variance,
+    sample_covariance, sample_standard_deviation, sample_variance,
 };
-pub use spearman::spearman;
+pub use spearman::spearman_correlation;
 pub use weighted::{weighted_mean, weighted_population_variance, weighted_reliability_variance};
 
 /// Failure of a checked statistics operation.

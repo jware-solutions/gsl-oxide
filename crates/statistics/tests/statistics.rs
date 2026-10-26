@@ -155,15 +155,18 @@ fn paired_anchors_and_contracts() {
         ([1., 0., 1.], 0., 0.),
     ] {
         close(sample_covariance(&x, &y).unwrap(), cov, 0., 3e-16);
-        close(correlation(&x, &y).unwrap(), r, 0., 3e-16);
+        close(pearson_correlation(&x, &y).unwrap(), r, 0., 3e-16);
         assert_eq!(sample_covariance(&x, &y), sample_covariance(&y, &x));
     }
     assert_eq!(sample_covariance(&x, &[5.; 3]), Ok(0.));
     assert_eq!(sample_covariance(&[f64::MAX; 3], &x), Ok(0.));
-    assert_eq!(correlation(&[f64::MAX; 3], &x), Err(Error::ZeroVariance));
-    assert_eq!(correlation(&x, &[5.; 3]), Err(Error::ZeroVariance));
-    assert_eq!(correlation(&[5.; 3], &x), Err(Error::ZeroVariance));
-    for query in [sample_covariance, correlation] {
+    assert_eq!(
+        pearson_correlation(&[f64::MAX; 3], &x),
+        Err(Error::ZeroVariance)
+    );
+    assert_eq!(pearson_correlation(&x, &[5.; 3]), Err(Error::ZeroVariance));
+    assert_eq!(pearson_correlation(&[5.; 3], &x), Err(Error::ZeroVariance));
+    for query in [sample_covariance, pearson_correlation] {
         assert_eq!(query(&x, &[1., 2.]), Err(Error::LengthMismatch));
         assert_eq!(query(&[], &[]), Err(Error::InsufficientData));
         assert_eq!(query(&[1.], &[2.]), Err(Error::InsufficientData));
@@ -186,18 +189,23 @@ fn paired_scaling_and_normalization_range() {
     ] {
         let x = [-a, 0., a];
         let y = [-b, 0., b];
-        close(correlation(&x, &y).unwrap(), 1., 0., 4e-16);
-        close(correlation(&x, &y.map(|v| -v)).unwrap(), -1., 0., 4e-16);
+        close(pearson_correlation(&x, &y).unwrap(), 1., 0., 4e-16);
+        close(
+            pearson_correlation(&x, &y.map(|v| -v)).unwrap(),
+            -1.,
+            0.,
+            4e-16,
+        );
     }
     close(
-        correlation(&[-f64::MAX, f64::MAX], &[-1., 1.]).unwrap(),
+        pearson_correlation(&[-f64::MAX, f64::MAX], &[-1., 1.]).unwrap(),
         1.,
         0.,
         4e-16,
     );
     // Opposite-extreme subtraction from a rounded nonzero mean overflows.
     close(
-        correlation(&[-f64::MAX, f64::MAX, f64::MAX], &[-1., 1., 1.]).unwrap(),
+        pearson_correlation(&[-f64::MAX, f64::MAX, f64::MAX], &[-1., 1., 1.]).unwrap(),
         1.,
         0.,
         5e-16,
@@ -209,7 +217,7 @@ fn paired_scaling_and_normalization_range() {
     let base = [-4., -1., 0., 2., 8.];
     let paired = [7., 2., 9., -3., 4.];
     let cov = sample_covariance(&base, &paired).unwrap();
-    let r = correlation(&base, &paired).unwrap();
+    let r = pearson_correlation(&base, &paired).unwrap();
     let shifted = base.map(|v| 2.0_f64.powi(40) - 2. * v);
     let scaled = paired.map(|v| 4. * v + 7.);
     close(
@@ -218,9 +226,19 @@ fn paired_scaling_and_normalization_range() {
         0.,
         8e-16,
     );
-    close(correlation(&shifted, &scaled).unwrap(), -r, 0., 8e-16);
+    close(
+        pearson_correlation(&shifted, &scaled).unwrap(),
+        -r,
+        0.,
+        8e-16,
+    );
     let t = f64::from_bits(1);
-    close(correlation(&[-t, t], &[-t, t]).unwrap(), 1., 0., 4e-16);
+    close(
+        pearson_correlation(&[-t, t], &[-t, t]).unwrap(),
+        1.,
+        0.,
+        4e-16,
+    );
 }
 
 #[test]

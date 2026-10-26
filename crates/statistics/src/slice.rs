@@ -129,7 +129,7 @@ pub fn sample_covariance(x: &[f64], y: &[f64]) -> Result<f64, Error> {
 /// of moments or requiring representable variances. Errors are those of
 /// [`sample_covariance`], plus [`Error::ZeroVariance`] for a constant input.
 /// [GSL correlation](https://www.gnu.org/software/gsl/doc/html/statistics.html#correlation).
-pub fn correlation(x: &[f64], y: &[f64]) -> Result<f64, Error> {
+pub fn pearson_correlation(x: &[f64], y: &[f64]) -> Result<f64, Error> {
     let (cx, cy) = paired(x, y)?;
     let mut cross = Sum::default();
     let mut sx = Sum::default();

@@ -107,12 +107,12 @@ pub(crate) fn positive_log(mut x: f64) -> f64 {
 /// outside the local Taylor regions can have about 1e-14 absolute roundoff.
 ///
 /// ```
-/// let (log, sign) = gsl_oxide_special::gamma::ln_gamma(-0.5)?;
+/// let (log, sign) = gsl_oxide_special::gamma::ln_abs_gamma_with_sign(-0.5)?;
 /// assert_eq!(sign, -1);
 /// assert!((log - (2.0 * std::f64::consts::PI.sqrt()).ln()).abs() < 1e-14);
 /// # Ok::<(), gsl_oxide_special::Error>(())
 /// ```
-pub fn ln_gamma(x: f64) -> Result<(f64, i32), Error> {
+pub fn ln_abs_gamma_with_sign(x: f64) -> Result<(f64, i32), Error> {
     if !x.is_finite() || (x <= 0.0 && x == x.trunc()) {
         return Err(Error::Domain);
     }
@@ -144,11 +144,12 @@ pub fn ln_gamma(x: f64) -> Result<(f64, i32), Error> {
 /// Returns `Gamma(x) = integral_0^infinity t^(x-1) exp(-t) dt` for positive
 /// `x`, with real continuation to negative nonintegers.
 ///
-/// Has the same argument and pole contract as [`ln_gamma`]. Unrepresentable
-/// magnitudes return [`Error::Overflow`]; underflow returns signed zero.
+/// Has the same argument and pole contract as [`ln_abs_gamma_with_sign`].
+/// Unrepresentable magnitudes return [`Error::Overflow`]; underflow returns
+/// signed zero.
 /// The signed logarithm remains useful outside the representable gamma range.
 /// See [DLMF §5.11](https://dlmf.nist.gov/5.11).
 pub fn gamma(x: f64) -> Result<f64, Error> {
-    let (log, sign) = ln_gamma(x)?;
+    let (log, sign) = ln_abs_gamma_with_sign(x)?;
     Ok(finite_exp(log)?.copysign(f64::from(sign)))
 }

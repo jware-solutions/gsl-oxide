@@ -1,8 +1,8 @@
 //! Complementary tails, numerical anchors, boundaries and domains.
 use gsl_oxide_special::{
     error_functions::{erf, erfc},
-    incomplete_beta::{complement, regularized},
-    incomplete_gamma::{p, q},
+    incomplete_beta::{regularized, regularized_complement},
+    incomplete_gamma::{lower_regularized, upper_regularized},
     Error,
 };
 mod support;
@@ -70,7 +70,7 @@ fn incomplete_gamma_anchors_and_closed_forms() {
     // Gamma(4.5)=105sqrt(pi)/16, Gamma(0.5)=sqrt(pi).
     // https://mpmath.readthedocs.io/en/latest/functions/expintegrals.html#gammainc
     assert_close(
-        q(10.0, 100.0).unwrap(),
+        upper_regularized(10.0, 100.0).unwrap(),
         4.083_660_630_910_611e-26 / 362880.0,
         0.0,
         5e-14,
@@ -78,21 +78,21 @@ fn incomplete_gamma_anchors_and_closed_forms() {
     );
     let g = 105.0 * std::f64::consts::PI.sqrt() / 16.0;
     assert_close(
-        p(4.5, 2.0).unwrap(),
+        lower_regularized(4.5, 2.0).unwrap(),
         1.0304254272321143 / g,
         0.0,
         5e-14,
         "lower gamma anchor",
     );
     assert_close(
-        q(4.5, 2.0).unwrap(),
+        upper_regularized(4.5, 2.0).unwrap(),
         10.601302969335335 / g,
         0.0,
         5e-14,
         "upper gamma anchor",
     );
     assert_close(
-        p(0.5, 2.0).unwrap(),
+        lower_regularized(0.5, 2.0).unwrap(),
         1.6918067329451983 / std::f64::consts::PI.sqrt(),
         0.0,
         5e-14,
@@ -100,22 +100,28 @@ fn incomplete_gamma_anchors_and_closed_forms() {
     );
     for x in [1e-300_f64, 1e-10, 0.1, 1.0, 5.0, 100.0, 700.0] {
         assert_close(
-            p(1.0, x).unwrap(),
+            lower_regularized(1.0, x).unwrap(),
             -(-x).exp_m1(),
             0.0,
             2e-15,
             "P exponential",
         );
-        assert_close(q(1.0, x).unwrap(), (-x).exp(), 0.0, 2e-15, "Q exponential");
         assert_close(
-            p(0.5, x * x).unwrap(),
+            upper_regularized(1.0, x).unwrap(),
+            (-x).exp(),
+            0.0,
+            2e-15,
+            "Q exponential",
+        );
+        assert_close(
+            lower_regularized(0.5, x * x).unwrap(),
             erf(x),
             1e-14,
             4e-14,
             "half gamma erf",
         );
         assert_close(
-            q(0.5, x * x).unwrap(),
+            upper_regularized(0.5, x * x).unwrap(),
             erfc(x),
             0.0,
             2e-13,
@@ -131,7 +137,7 @@ fn incomplete_gamma_anchors_and_closed_forms() {
                 sum += term;
             }
             assert_close(
-                q(f64::from(n), x).unwrap(),
+                upper_regularized(f64::from(n), x).unwrap(),
                 (-x).exp() * sum,
                 0.0,
                 2e-13,
@@ -142,14 +148,20 @@ fn incomplete_gamma_anchors_and_closed_forms() {
     // Tiny Q for tiny shape: Q(a,1)/a -> E1(1), with O(a) correction.
     // Published E1(1) https://mpmath.readthedocs.io/en/latest/functions/expintegrals.html#e1
     assert_close(
-        q(1e-20, 1.0).unwrap(),
+        upper_regularized(1e-20, 1.0).unwrap(),
         2.193_839_343_955_203e-21,
         0.0,
         2e-14,
         "small-shape Q",
     );
-    assert!(p(2.0, 1e-150).unwrap() > 0.0);
-    assert_close(p(2.0, 1e-150).unwrap(), 5e-301, 0.0, 2e-13, "tiny P");
+    assert!(lower_regularized(2.0, 1e-150).unwrap() > 0.0);
+    assert_close(
+        lower_regularized(2.0, 1e-150).unwrap(),
+        5e-301,
+        0.0,
+        2e-13,
+        "tiny P",
+    );
 }
 
 #[test]
@@ -165,32 +177,38 @@ fn incomplete_gamma_regions_and_errors() {
             a * 1.1,
             1e308,
         ] {
-            let (v, w) = (p(a, x).unwrap(), q(a, x).unwrap());
+            let (v, w) = (
+                lower_regularized(a, x).unwrap(),
+                upper_regularized(a, x).unwrap(),
+            );
             assert_close(v + w, 1.0, 3e-15, 0.0, "gamma complement");
             assert!((0.0..=1.0).contains(&v) && (0.0..=1.0).contains(&w));
         }
-        assert_eq!(p(a, 0.0), Ok(0.0));
-        assert_eq!(q(a, -0.0), Ok(1.0));
-        assert_eq!(p(a, f64::INFINITY), Ok(1.0));
-        assert_eq!(q(a, f64::INFINITY), Ok(0.0));
+        assert_eq!(lower_regularized(a, 0.0), Ok(0.0));
+        assert_eq!(upper_regularized(a, -0.0), Ok(1.0));
+        assert_eq!(lower_regularized(a, f64::INFINITY), Ok(1.0));
+        assert_eq!(upper_regularized(a, f64::INFINITY), Ok(0.0));
     }
     // Central-limit expansion at x=a: P=1/2+1/(3sqrt(2pi a))+O(a^-3/2),
     // DLMF 8.12. The first correction is 1/(540 sqrt(2pi) a^1.5).
     assert_close(
-        p(1e6, 1e6).unwrap(),
+        lower_regularized(1e6, 1e6).unwrap(),
         0.5001329807608725,
         3e-13,
         0.0,
         "large transition",
     );
     for a in [0.0, -1.0, f64::NAN, f64::INFINITY] {
-        assert_eq!(p(a, 0.0), Err(Error::Domain));
-        assert_eq!(q(a, 1.0), Err(Error::Domain));
+        assert_eq!(lower_regularized(a, 0.0), Err(Error::Domain));
+        assert_eq!(upper_regularized(a, 1.0), Err(Error::Domain));
     }
     for x in [-1.0, f64::NEG_INFINITY, f64::NAN] {
-        assert_eq!(q(1.0, x), Err(Error::Domain));
+        assert_eq!(upper_regularized(1.0, x), Err(Error::Domain));
     }
-    assert_eq!(p(1e6 + 1.0, 1.0), Err(Error::UnsupportedRange));
+    assert_eq!(
+        lower_regularized(1e6 + 1.0, 1.0),
+        Err(Error::UnsupportedRange)
+    );
 }
 
 #[test]
@@ -219,7 +237,7 @@ fn incomplete_beta_closed_forms_and_anchors() {
             "beta integral anchor",
         );
         assert_close(
-            complement(a, b, x).unwrap(),
+            regularized_complement(a, b, x).unwrap(),
             1.0 - y,
             0.0,
             8e-14,
@@ -245,7 +263,7 @@ fn incomplete_beta_closed_forms_and_anchors() {
                 "power CDF",
             );
             assert_close(
-                complement(1.0, a, x).unwrap(),
+                regularized_complement(1.0, a, x).unwrap(),
                 (a * (-x).ln_1p()).exp(),
                 0.0,
                 2e-15,
@@ -264,7 +282,7 @@ fn incomplete_beta_closed_forms_and_anchors() {
     let x = f64::from_bits(1.0_f64.to_bits() - 1);
     let d = 1.0 - x;
     assert_close(
-        complement(3.0, 2.0, x).unwrap(),
+        regularized_complement(3.0, 2.0, x).unwrap(),
         6.0 * d * d - 8.0 * d * d * d + 3.0 * d.powi(4),
         0.0,
         1e-13,
@@ -288,7 +306,7 @@ fn published_beta_tails_and_large_shape_anchor() {
             "published beta lower",
         );
         assert_close(
-            complement(a, b, x).unwrap(),
+            regularized_complement(a, b, x).unwrap(),
             1.0 - y,
             0.0,
             5e-14,
@@ -303,7 +321,7 @@ fn published_beta_tails_and_large_shape_anchor() {
         (0.999, 1.96467954e-25),
     ] {
         assert_close(
-            complement(0.5, 8.0, x).unwrap(),
+            regularized_complement(0.5, 8.0, x).unwrap(),
             y,
             0.0,
             3e-9,
@@ -326,7 +344,7 @@ fn published_beta_tails_and_large_shape_anchor() {
         "large beta binomial anchor",
     );
     assert_close(
-        complement(n, n + 1.0, 0.5).unwrap(),
+        regularized_complement(n, n + 1.0, 0.5).unwrap(),
         1.0 - expected,
         1e-9,
         0.0,
@@ -360,7 +378,7 @@ fn incomplete_beta_regions_and_errors() {
             assert!(y >= previous);
             previous = y;
             assert_close(
-                y + complement(a, b, x).unwrap(),
+                y + regularized_complement(a, b, x).unwrap(),
                 1.0,
                 3e-15,
                 0.0,
@@ -369,7 +387,7 @@ fn incomplete_beta_regions_and_errors() {
             if x > 1e-9 && x < 1.0 {
                 assert_close(
                     y,
-                    complement(b, a, 1.0 - x).unwrap(),
+                    regularized_complement(b, a, 1.0 - x).unwrap(),
                     2e-9,
                     0.0,
                     "beta symmetry",
@@ -392,7 +410,7 @@ fn incomplete_beta_regions_and_errors() {
     }
     for a in [0.0, -1.0, f64::NAN, f64::INFINITY] {
         assert_eq!(regularized(a, 1.0, 0.0), Err(Error::Domain));
-        assert_eq!(complement(1.0, a, 1.0), Err(Error::Domain));
+        assert_eq!(regularized_complement(1.0, a, 1.0), Err(Error::Domain));
     }
     for x in [-0.1, 1.1, f64::NAN, f64::INFINITY, f64::NEG_INFINITY] {
         assert_eq!(regularized(2.0, 3.0, x), Err(Error::Domain));
@@ -410,7 +428,7 @@ fn tiny_shape_tail_regressions() {
     let x = 0.25_f64;
     let expected = -(a * x.ln()).exp_m1() - a * (1.0 - x) * (a * x.ln()).exp();
     assert_close(
-        complement(a, 2.0, x).unwrap(),
+        regularized_complement(a, 2.0, x).unwrap(),
         expected,
         0.0,
         2e-14,
@@ -427,10 +445,10 @@ fn tiny_shape_tail_regressions() {
     // x^a/Gamma(a+1) approximates gamma P at x=1e-300 to O(x).
     // Use a=1/8 and compare two lower tails after changing x by 2^8:
     // the ratio is 2, with O(x) error, and both must remain positive.
-    let p1 = p(0.125, 1e-300).unwrap();
+    let p1 = lower_regularized(0.125, 1e-300).unwrap();
     assert!(p1 > 0.0);
     assert_close(
-        p(0.125, 256e-300).unwrap(),
+        lower_regularized(0.125, 256e-300).unwrap(),
         2.0 * p1,
         0.0,
         4e-14,
@@ -448,7 +466,7 @@ fn tiny_shape_tail_regressions() {
     // immediately above 1. Q(a,x)/a -> E1(x); |E1(1+h)-E1(1)| < h.
     let x = f64::from_bits(1.0_f64.to_bits() + 1);
     assert_close(
-        q(1e-10, x).unwrap() / 1e-10,
+        upper_regularized(1e-10, x).unwrap() / 1e-10,
         0.21938393439552027,
         5e-11,
         0.0,

@@ -17,7 +17,7 @@ const MAX_DEGREE: u32 = 1000;
 /// leading Taylor term, multiplying by x only at the end. A numerical breakdown
 /// returns [`Error::NonConvergence`]. See the
 /// [GSL reference](https://www.gnu.org/software/gsl/doc/html/specfunc.html#legendre-polynomials).
-pub fn p(n: u32, x: f64) -> Result<f64, Error> {
+pub fn polynomial(n: u32, x: f64) -> Result<f64, Error> {
     if !x.is_finite() || !(-1.0..=1.0).contains(&x) {
         return Err(Error::Domain);
     }

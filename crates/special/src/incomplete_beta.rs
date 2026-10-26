@@ -115,9 +115,9 @@ fn tails(a: f64, b: f64, x: f64, limit: usize) -> Result<(f64, f64), Error> {
 /// balanced shapes; full f64 relative accuracy is not promised there.
 ///
 /// ```
-/// use gsl_oxide_special::incomplete_beta::{regularized, complement};
+/// use gsl_oxide_special::incomplete_beta::{regularized, regularized_complement};
 /// assert!((regularized(2.0, 3.0, 0.5)? - 0.6875).abs() < 1e-13);
-/// assert!(complement(0.5, 8.0, 0.999)? > 0.0);
+/// assert!(regularized_complement(0.5, 8.0, 0.999)? > 0.0);
 /// # Ok::<(), gsl_oxide_special::Error>(())
 /// ```
 pub fn regularized(a: f64, b: f64, x: f64) -> Result<f64, Error> {
@@ -129,7 +129,7 @@ pub fn regularized(a: f64, b: f64, x: f64) -> Result<f64, Error> {
 /// Has [`regularized`]'s domain, restrictions and errors, with exact 1/0
 /// at x=0/1. Subnormal tails are retained when representable and otherwise
 /// underflow to positive zero. See [DLMF 8.17.4](https://dlmf.nist.gov/8.17.E4).
-pub fn complement(a: f64, b: f64, x: f64) -> Result<f64, Error> {
+pub fn regularized_complement(a: f64, b: f64, x: f64) -> Result<f64, Error> {
     Ok(tails(a, b, x, LIMIT)?.1)
 }
 

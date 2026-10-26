@@ -35,7 +35,7 @@ fn restore(mut value: f64, scales: u32) -> Result<f64, Error> {
 /// ordinary underflow is allowed. Roundoff grows with degree and relative
 /// accuracy deteriorates near roots; use absolute error allowances there.
 /// See the [GSL reference](https://www.gnu.org/software/gsl/doc/html/specfunc.html#laguerre-functions).
-pub fn generalized(n: u32, alpha: f64, x: f64) -> Result<f64, Error> {
+pub fn generalized_polynomial(n: u32, alpha: f64, x: f64) -> Result<f64, Error> {
     if !alpha.is_finite() || alpha <= -1.0 || !x.is_finite() {
         return Err(Error::Domain);
     }
