@@ -117,10 +117,12 @@ fn cancellation_extreme_and_tiny_scales() {
     assert_eq!(mean(&[tiny, 3. * tiny]), Ok(2. * tiny));
     positive_zero(population_variance(&[-tiny, tiny]).unwrap());
     // Squared subnormal *results* are retained; no near-constant threshold.
+    // 2^-1060 = 2^14 * 2^-1074. Construct the exact subnormal by its bits:
+    // powi(-1060) can underflow to zero on some platforms.
     let s = 2.0_f64.powi(-530);
     close(
         population_variance(&[-s, s]).unwrap(),
-        2.0_f64.powi(-1060),
+        f64::from_bits(1 << 14),
         0.,
         0.,
     );

@@ -174,9 +174,11 @@ fn weighted_value_range_and_identities() {
     );
     let data = [-4., -1., 3., 8.];
     let weights = [2., 3., 7., 1.];
+    // Exact 2^-1060 and 2^-1059 in units of the smallest subnormal, 2^-1074.
+    // powi with these negative exponents can underflow to zero on some platforms.
     for (query, tiny_expected) in QUERIES[1..]
         .iter()
-        .zip([2.0_f64.powi(-1060), 2.0_f64.powi(-1059)])
+        .zip([f64::from_bits(1 << 14), f64::from_bits(1 << 15)])
     {
         let expected = query(&data, &weights).unwrap();
         close(

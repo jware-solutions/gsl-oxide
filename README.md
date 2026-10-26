@@ -63,7 +63,9 @@ Contributions are welcome from the community. Please follow the guidelines in [C
 
 ### CI and release
 
-Merging into `main` runs CI and automatically publishes releases using [release-plz](https://release-plz.dev/).
+Every push to `main` runs the release workflow, which validates the full CI matrix before publishing unpublished crate versions to crates.io using [release-plz](https://release-plz.dev/). The repository must have a `CARGO_REGISTRY_TOKEN` Actions secret with publishing access to the crates.
+
+Versions are taken from `Cargo.toml`. Versions already on crates.io are skipped.
 
 ## License
 
