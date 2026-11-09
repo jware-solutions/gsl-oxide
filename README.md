@@ -8,7 +8,7 @@ The libraries use safe Rust and require no GSL installation or native numerical 
 
 | Crate | Supported functionality |
 | --- | --- |
-| [gsl-oxide-special](https://docs.rs/gsl-oxide-special) | Error, gamma, beta, Bessel, and exponential integral functions; Legendre and generalized Laguerre polynomials. |
+| [gsl-oxide-special](https://docs.rs/gsl-oxide-special) | Error, gamma, beta, Bessel, and exponential integral functions; Legendre and generalized Laguerre polynomials; integer powers via `Pow`. |
 | [gsl-oxide-integration](https://docs.rs/gsl-oxide-integration) | Adaptive integration over finite and infinite intervals, with breakpoints and supported endpoint singularities. |
 | [gsl-oxide-statistics](https://docs.rs/gsl-oxide-statistics) | Mean, variance, standard deviation, covariance, correlations, weighted statistics, and streaming statistics. |
 

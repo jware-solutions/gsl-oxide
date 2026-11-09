@@ -2,7 +2,8 @@
 //!
 //! Error functions, gamma/beta, regularized incomplete gamma/beta, and
 //! integer-order cylindrical Bessel functions, real exponential integrals,
-//! Legendre polynomials and generalized Laguerre polynomials form the subset.
+//! Legendre polynomials, generalized Laguerre polynomials, and integer powers
+//! form the subset.
 //! Each module documents its supported domains and numerical limits.
 //!
 //! ```
@@ -45,6 +46,9 @@ pub mod incomplete_beta;
 pub mod incomplete_gamma;
 pub mod laguerre;
 pub mod legendre;
+mod pow;
+
+pub use pow::Pow;
 
 /// Failure of a checked special-function evaluation.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

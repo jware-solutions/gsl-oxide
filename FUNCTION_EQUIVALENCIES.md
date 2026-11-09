@@ -51,6 +51,18 @@ These functions have no direct GSL entry point with the same inputs and meaning.
 
 GSL's `*_variance_with_fixed_mean` functions use a supplied population mean; they are not direct replacements for these population-variance functions. `gsl_stats_pvariance` computes pooled variance, not population variance.
 
+## Integer powers
+
+Import `gsl_oxide_special::Pow as _` to use these methods on `f64`. The trait uses GSL 2.8's multiplication order. Signed exponents cover the full `i32` range; unsigned exponents cover the full `u32` range.
+
+| GSL function | Rust method |
+| --- | --- |
+| `gsl_pow_int(x, n)` | `x.pow_int(n)` |
+| `gsl_pow_uint(x, n)` | `x.pow_uint(n)` |
+| `gsl_pow_2(x)` through `gsl_pow_9(x)` | `x.pow_2()` through `x.pow_9()` |
+
+These methods return `f64` directly, with no overflow or underflow checks, as in GSL. A zero exponent returns `1.0` even for zero, infinite, or NaN bases. Negative exponents take the reciprocal of the base before repeated squaring.
+
 ## Special functions
 
 Rust paths in this section are relative to `gsl_oxide_special`. Where GSL also supplies an `_e` variant, the row identifies the mathematical function only: Rust's `Result` reports failures but does not provide GSL's numerical error estimate.
