@@ -7,9 +7,25 @@ name = "gsl-oxide-integration"
 version = "0.1.1"
 
 [[package]]
+name = "gsl-oxide-randist"
+version = "0.1.1"
+dependencies = [
+ "gsl-oxide-integration",
+ "gsl-oxide-special",
+ "gsl-oxide-statistics",
+ "rand_core",
+]
+
+[[package]]
 name = "gsl-oxide-special"
 version = "0.1.1"
 
 [[package]]
 name = "gsl-oxide-statistics"
 version = "0.1.1"
+
+[[package]]
+name = "rand_core"
+version = "0.6.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"

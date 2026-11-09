@@ -58,6 +58,7 @@ jobs:
       - run: cargo +${{ matrix.toolchain }} build -p gsl-oxide-special --locked
       - run: cargo +${{ matrix.toolchain }} build -p gsl-oxide-integration --locked
       - run: cargo +${{ matrix.toolchain }} build -p gsl-oxide-statistics --locked
+      - run: cargo +${{ matrix.toolchain }} build -p gsl-oxide-randist --locked
       - run: cargo +stable package --workspace --list --locked
         if: matrix.os == 'ubuntu-24.04' && matrix.toolchain == 'stable'
       - run: cargo +stable package --workspace --locked

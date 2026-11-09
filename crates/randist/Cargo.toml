@@ -1,0 +1,22 @@
+[package]
+name = "gsl-oxide-randist"
+description = "Safe Rust random distributions, densities, and sampling utilities from GSL"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+repository.workspace = true
+readme.workspace = true
+include.workspace = true
+license.workspace = true
+
+[dependencies]
+gsl-oxide-special = { path = "../special", version = "0.1.1" }
+rand_core = "0.6.4"
+
+[dev-dependencies]
+gsl-oxide-integration = { path = "../integration", version = "0.1.1" }
+gsl-oxide-statistics = { path = "../statistics", version = "0.1.1" }
+
+[lints]
+workspace = true

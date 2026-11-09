@@ -140,6 +140,125 @@ Rust names are relative to `gsl_oxide_integration`. These are counterparts by in
 
 Rust takes a closure, manages its own storage, and returns `(integral, estimated_absolute_error)` inside `Result`. Its `max_evals` parameter limits callback evaluations; GSL's workspace/subinterval limit is not interchangeable with it. Finite integration uses a fixed Gauss 7 / Kronrod 15 rule, and endpoint-singularity integration uses tanh-sinh. The latter supports endpoint logarithms and powers with exponent at least `-1/2`; consult its API contract before replacing a GSL `qags` call.
 
+## Random distributions and sampling
+
+Rust names in this section are relative to `gsl_oxide_randist`. The tables cover all 102 public function declarations in GSL 2.8's `gsl_randist.h`, including compatibility aliases and memory management.
+
+Sampling takes a caller-owned `&mut RngCore` from `rand_core` 0.6 (also used by `rand` 0.8); the trait is re-exported by the crate. The crate supplies distributions, not RNG implementations or seeding. Scalar samplers generally return `Result`, while standard-normal, Landau, and fixed-dimensional direction samplers return values directly. Densities and probability masses use checked `Result` APIs. See the crate documentation for domains and range errors.
+
+The `_density` suffix identifies a continuous density; `_pdf` identifies a discrete probability; `_log_density` and `_log_pdf` use natural logarithms. At singular support boundaries Rust uses limiting densities, which can be infinite where GSL sometimes returns zero. These are distribution counterparts; RNG sequences and implementation algorithms can differ. In particular, `binomial` uses Knuth splitting and geometric waiting times rather than GSL's BTPE implementation. GSL's `binomial_tpe` and `gamma_mt` compatibility aliases map to the corresponding default Rust samplers.
+
+| GSL function | Rust function or method |
+| --- | --- |
+| `gsl_ran_bernoulli` | `bernoulli` |
+| `gsl_ran_bernoulli_pdf` | `bernoulli_pdf` |
+| `gsl_ran_beta` | `beta` |
+| `gsl_ran_beta_pdf` | `beta_density` |
+| `gsl_ran_binomial` | `binomial` |
+| `gsl_ran_binomial_knuth` | `binomial_knuth` |
+| `gsl_ran_binomial_tpe` | `binomial` |
+| `gsl_ran_binomial_pdf` | `binomial_pdf` |
+| `gsl_ran_exponential` | `exponential` |
+| `gsl_ran_exponential_pdf` | `exponential_density` |
+| `gsl_ran_exppow` | `exponential_power` |
+| `gsl_ran_exppow_pdf` | `exponential_power_density` |
+| `gsl_ran_cauchy` | `cauchy` |
+| `gsl_ran_cauchy_pdf` | `cauchy_density` |
+| `gsl_ran_chisq` | `chi_squared` |
+| `gsl_ran_chisq_pdf` | `chi_squared_density` |
+| `gsl_ran_dirichlet` | `dirichlet` |
+| `gsl_ran_dirichlet_pdf` | `dirichlet_density` |
+| `gsl_ran_dirichlet_lnpdf` | `dirichlet_log_density` |
+| `gsl_ran_erlang` | `erlang` |
+| `gsl_ran_erlang_pdf` | `erlang_density` |
+| `gsl_ran_fdist` | `fisher_f` |
+| `gsl_ran_fdist_pdf` | `fisher_f_density` |
+| `gsl_ran_flat` | `uniform_interval` |
+| `gsl_ran_flat_pdf` | `uniform_interval_density` |
+| `gsl_ran_gamma` | `gamma` |
+| `gsl_ran_gamma_int` | `gamma_integer` |
+| `gsl_ran_gamma_pdf` | `gamma_density` |
+| `gsl_ran_gamma_mt` | `gamma` |
+| `gsl_ran_gamma_knuth` | `gamma_knuth` |
+| `gsl_ran_gaussian` | `normal` |
+| `gsl_ran_gaussian_ratio_method` | `normal_ratio` |
+| `gsl_ran_gaussian_ziggurat` | `normal_ziggurat` |
+| `gsl_ran_gaussian_pdf` | `normal_density` |
+| `gsl_ran_ugaussian` | `standard_normal` |
+| `gsl_ran_ugaussian_ratio_method` | `standard_normal_ratio` |
+| `gsl_ran_ugaussian_pdf` | `standard_normal_density` |
+| `gsl_ran_gaussian_tail` | `normal_tail` |
+| `gsl_ran_gaussian_tail_pdf` | `normal_tail_density` |
+| `gsl_ran_ugaussian_tail` | `standard_normal_tail` |
+| `gsl_ran_ugaussian_tail_pdf` | `standard_normal_tail_density` |
+| `gsl_ran_bivariate_gaussian` | `bivariate_normal` |
+| `gsl_ran_bivariate_gaussian_pdf` | `bivariate_normal_density` |
+| `gsl_ran_multivariate_gaussian` | `multivariate_normal` |
+| `gsl_ran_multivariate_gaussian_log_pdf` | `multivariate_normal_log_density` |
+| `gsl_ran_multivariate_gaussian_pdf` | `multivariate_normal_density` |
+| `gsl_ran_multivariate_gaussian_mean` | `multivariate_mean` |
+| `gsl_ran_multivariate_gaussian_vcov` | `multivariate_sample_covariance` |
+| `gsl_ran_wishart` | `wishart` |
+| `gsl_ran_wishart_log_pdf` | `wishart_log_density` |
+| `gsl_ran_wishart_pdf` | `wishart_density` |
+| `gsl_ran_landau` | `landau` |
+| `gsl_ran_landau_pdf` | `landau_density` |
+| `gsl_ran_geometric` | `geometric` |
+| `gsl_ran_geometric_pdf` | `geometric_pdf` |
+| `gsl_ran_hypergeometric` | `hypergeometric` |
+| `gsl_ran_hypergeometric_pdf` | `hypergeometric_pdf` |
+| `gsl_ran_gumbel1` | `gumbel_type_1` |
+| `gsl_ran_gumbel1_pdf` | `gumbel_type_1_density` |
+| `gsl_ran_gumbel2` | `gumbel_type_2` |
+| `gsl_ran_gumbel2_pdf` | `gumbel_type_2_density` |
+| `gsl_ran_logistic` | `logistic` |
+| `gsl_ran_logistic_pdf` | `logistic_density` |
+| `gsl_ran_lognormal` | `lognormal` |
+| `gsl_ran_lognormal_pdf` | `lognormal_density` |
+| `gsl_ran_logarithmic` | `logarithmic_series` |
+| `gsl_ran_logarithmic_pdf` | `logarithmic_series_pdf` |
+| `gsl_ran_multinomial` | `multinomial` |
+| `gsl_ran_multinomial_pdf` | `multinomial_pdf` |
+| `gsl_ran_multinomial_lnpdf` | `multinomial_log_pdf` |
+| `gsl_ran_negative_binomial` | `negative_binomial` |
+| `gsl_ran_negative_binomial_pdf` | `negative_binomial_pdf` |
+| `gsl_ran_pascal` | `pascal` |
+| `gsl_ran_pascal_pdf` | `pascal_pdf` |
+| `gsl_ran_pareto` | `pareto` |
+| `gsl_ran_pareto_pdf` | `pareto_density` |
+| `gsl_ran_poisson` | `poisson` |
+| `gsl_ran_poisson_array` | `fill_poisson` |
+| `gsl_ran_poisson_pdf` | `poisson_pdf` |
+| `gsl_ran_rayleigh` | `rayleigh` |
+| `gsl_ran_rayleigh_pdf` | `rayleigh_density` |
+| `gsl_ran_rayleigh_tail` | `rayleigh_tail` |
+| `gsl_ran_rayleigh_tail_pdf` | `rayleigh_tail_density` |
+| `gsl_ran_tdist` | `student_t` |
+| `gsl_ran_tdist_pdf` | `student_t_density` |
+| `gsl_ran_laplace` | `laplace` |
+| `gsl_ran_laplace_pdf` | `laplace_density` |
+| `gsl_ran_levy` | `stable_symmetric` |
+| `gsl_ran_levy_skew` | `stable_skewed` |
+| `gsl_ran_weibull` | `weibull` |
+| `gsl_ran_weibull_pdf` | `weibull_density` |
+| `gsl_ran_dir_2d` | `direction_2d` |
+| `gsl_ran_dir_2d_trig_method` | `direction_2d_trigonometric` |
+| `gsl_ran_dir_3d` | `direction_3d` |
+| `gsl_ran_dir_nd` | `direction_nd` |
+| `gsl_ran_shuffle` | `shuffle` |
+| `gsl_ran_choose` | `choose` |
+| `gsl_ran_sample` | `sample_with_replacement` |
+| `gsl_ran_discrete_preproc` | `DiscreteDistribution::new` |
+| `gsl_ran_discrete_free` | Automatic cleanup when DiscreteDistribution is dropped. |
+| `gsl_ran_discrete` | `DiscreteDistribution::sample` |
+| `gsl_ran_discrete_pdf` | `DiscreteDistribution::pdf` |
+
+Slices replace pointer/count pairs; returned vectors and tuples replace output pointers, and scratch storage is managed internally. `multinomial(rng, trials, weights)` accepts unnormalized nonnegative weights. `dirichlet` takes concentration parameters; its density takes concentrations followed by simplex coordinates. `geometric` counts trials through the first success; negative binomial and Pascal count failures before the requested successes. Hypergeometric draws are clamped to the population as in GSL.
+
+Multivariate matrices are flattened row-major slices. Normal sampling and density take a mean vector and the lower Cholesky factor of its covariance; the dimension comes from the mean. Upper-triangular factor entries are ignored. The mean and sample-covariance estimators take observations followed by their column count; covariance divides by `rows - 1`. `wishart(rng, degrees, scale_cholesky, dimensions)` returns a square matrix. Wishart density functions take `(sample_cholesky, degrees, scale_cholesky, dimensions)`: the observation factor supplies its determinant and the trace term, so GSL's redundant observation matrix and work matrix are unnecessary.
+
+`choose` preserves source order and samples without replacement; `sample_with_replacement` permits repeated items. Both return cloned items. `shuffle` mutates a borrowed slice. `DiscreteDistribution::new` preprocesses weights into a Walker alias table, with automatic cleanup. Its `pdf(category)` method returns the normalized probability for a zero-based category index, or zero outside the table.
+
 ## GSL references
 
-The GSL 2.8 definitions are documented in [Statistics](https://www.gnu.org/software/gsl/doc/html/statistics.html), [Running Statistics](https://www.gnu.org/software/gsl/doc/html/rstat.html), [Special Functions](https://www.gnu.org/software/gsl/doc/html/specfunc.html), and [Numerical Integration](https://www.gnu.org/software/gsl/doc/html/integration.html).
+The GSL 2.8 definitions are documented in [Statistics](https://www.gnu.org/software/gsl/doc/html/statistics.html), [Running Statistics](https://www.gnu.org/software/gsl/doc/html/rstat.html), [Special Functions](https://www.gnu.org/software/gsl/doc/html/specfunc.html), [Numerical Integration](https://www.gnu.org/software/gsl/doc/html/integration.html), and [Random Number Distributions](https://www.gnu.org/software/gsl/doc/html/randist.html).
