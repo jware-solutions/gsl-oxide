@@ -22,9 +22,9 @@ Requires **Rust 1.85.0 or newer**. Add the crates you need from crates.io to you
 
 ```toml
 [dependencies]
-gsl-oxide-special = "0.1.0"
-gsl-oxide-integration = "0.1.0"
-gsl-oxide-statistics = "0.1.0"
+gsl-oxide-special = "0.1.1"
+gsl-oxide-integration = "0.1.1"
+gsl-oxide-statistics = "0.1.1"
 ```
 
 ```rust
@@ -63,7 +63,7 @@ Contributions are welcome from the community. Please follow the guidelines in [C
 
 ### CI and release
 
-Every push to `main` runs the release workflow, which validates the full CI matrix before publishing unpublished crate versions to crates.io using [release-plz](https://release-plz.dev/). Each published crate also gets a `<package>-v<version>` tag and a GitHub Release with automatically generated release notes (for example, `gsl-oxide-special-v0.1.0`).
+Every push to `main` runs the release workflow, which validates the full CI matrix before publishing unpublished crate versions to crates.io using [release-plz](https://release-plz.dev/). Each published crate also gets a `<package>-v<version>` tag and a GitHub Release with automatically generated release notes (for example, `gsl-oxide-special-v0.1.1`).
 
 The repository must have a `CARGO_REGISTRY_TOKEN` Actions secret with publishing access to the crates. Tags and GitHub Releases use the automatic `GITHUB_TOKEN`, with `contents: write` permission granted to the publish job.
 

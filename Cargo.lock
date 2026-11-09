@@ -4,12 +4,12 @@ version = 4
 
 [[package]]
 name = "gsl-oxide-integration"
-version = "0.1.0"
+version = "0.1.1"
 
 [[package]]
 name = "gsl-oxide-special"
-version = "0.1.0"
+version = "0.1.1"
 
 [[package]]
 name = "gsl-oxide-statistics"
-version = "0.1.0"
+version = "0.1.1"
