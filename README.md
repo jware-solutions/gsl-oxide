@@ -72,6 +72,8 @@ The repository must have a `CARGO_REGISTRY_TOKEN` Actions secret with publishing
 
 Versions are taken from `Cargo.toml`. Versions already on crates.io are skipped, including tag and GitHub Release creation.
 
+Manual runs default to `dry_run = true`, which runs CI and `cargo +stable package --workspace --locked` without publishing crates, tags, or GitHub Releases. Workspace packaging resolves unpublished internal dependencies locally; actual publishing uses `release-plz release` to publish dependencies before their dependents.
+
 ## License
 
 This project derives from [GNU GSL](https://www.gnu.org/software/gsl/) and is distributed under **GPLv3 or later** (`GPL-3.0-or-later`); see [LICENSE](https://github.com/jware-solutions/gsl-oxide/blob/main/LICENSE).
