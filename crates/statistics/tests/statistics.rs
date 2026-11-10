@@ -14,6 +14,7 @@ const QUERIES: [Query; 5] = [
     sample_standard_deviation,
 ];
 
+/// Checks elementary anchors.
 #[test]
 fn elementary_anchors() {
     // Sum of centered squares: 10, 32, and 5, respectively.
@@ -42,6 +43,7 @@ fn elementary_anchors() {
     }
 }
 
+/// Checks empty singleton constants and signed zero.
 #[test]
 fn empty_singleton_constants_and_signed_zero() {
     for query in QUERIES {
@@ -65,6 +67,7 @@ fn empty_singleton_constants_and_signed_zero() {
     }
 }
 
+/// Checks nonfinite and overflow.
 #[test]
 fn nonfinite_and_overflow() {
     for bad in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY] {
@@ -97,6 +100,7 @@ fn nonfinite_and_overflow() {
     );
 }
 
+/// Checks cancellation extreme and tiny scales.
 #[test]
 fn cancellation_extreme_and_tiny_scales() {
     close(mean(&[1e16, 1., -1e16]).unwrap(), 1. / 3., 0., 2e-16);
@@ -131,6 +135,7 @@ fn cancellation_extreme_and_tiny_scales() {
     close(population_variance(&data).unwrap(), 1e300 / 3., 0., 5e-16);
 }
 
+/// Checks translation and scaling.
 #[test]
 fn translation_and_scaling() {
     let base = [-4., -1., 0., 2., 8.];
@@ -148,6 +153,7 @@ fn translation_and_scaling() {
     close(sample_variance(&shifted).unwrap(), v, 0., 4e-16);
 }
 
+/// Checks paired anchors and contracts.
 #[test]
 fn paired_anchors_and_contracts() {
     let x = [1., 2., 3.];
@@ -179,6 +185,7 @@ fn paired_anchors_and_contracts() {
     }
 }
 
+/// Checks paired scaling and normalization range.
 #[test]
 fn paired_scaling_and_normalization_range() {
     // Perfect linear relationships, with moments/product of deviations outside
@@ -243,6 +250,7 @@ fn paired_scaling_and_normalization_range() {
     );
 }
 
+/// Checks finite comparison helper rejects invalid arguments.
 #[test]
 fn finite_comparison_helper_rejects_invalid_arguments() {
     for bad in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY, -1.] {
@@ -258,6 +266,7 @@ fn finite_comparison_helper_rejects_invalid_arguments() {
     assert!(std::panic::catch_unwind(|| close(1.1, 1., 0.01, 0.01)).is_err());
 }
 
+/// Checks errors have display and standard error.
 #[test]
 fn errors_have_display_and_standard_error() {
     for error in [

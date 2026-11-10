@@ -8,6 +8,7 @@ const MAX_X: f64 = 10000.0;
 const SCALE: f64 = 1.340_780_792_994_259_7e154; // 2^512, exact
 const THRESHOLD: f64 = 3.273_390_607_896_142e150; // 2^500, exact
 
+/// Restores `value` after `scales` recurrence rescalings, returning an overflow error if necessary.
 fn restore(mut value: f64, scales: u32) -> Result<f64, Error> {
     for _ in 0..scales {
         value *= SCALE;
@@ -96,6 +97,7 @@ pub fn generalized_polynomial(n: u32, alpha: f64, x: f64) -> Result<f64, Error> 
 mod tests {
     use super::*;
 
+    /// Checks restoration checks overflow and signed zero.
     #[test]
     fn restoration_checks_overflow_and_signed_zero() {
         assert_eq!(restore(1.0, 2), Err(Error::Overflow));

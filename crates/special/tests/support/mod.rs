@@ -1,5 +1,6 @@
 // Finite comparisons only: NaN/infinity use direct assertions, and signed zero
 // uses to_bits() in the calling tests. Approximate equality cannot check a zero's sign.
+/// Asserts that `actual` and `expected` agree within the supplied absolute and relative tolerances.
 pub(crate) fn assert_close(actual: f64, expected: f64, abs_tol: f64, rel_tol: f64, context: &str) {
     assert!(
         abs_tol.is_finite() && abs_tol >= 0.0 && rel_tol.is_finite() && rel_tol >= 0.0,

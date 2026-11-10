@@ -3,6 +3,7 @@ use gsl_oxide_special::{exponential_integrals::*, Error};
 mod support;
 use support::assert_close;
 
+/// Checks independent values.
 #[test]
 fn independent_values() {
     // mpmath's published examples (read only, no oracle executed):
@@ -72,6 +73,7 @@ fn independent_values() {
     );
 }
 
+/// Checks zero nonfinite and tiny arguments.
 #[test]
 fn zero_nonfinite_and_tiny_arguments() {
     for x in [0.0, -0.0] {
@@ -107,6 +109,7 @@ fn zero_nonfinite_and_tiny_arguments() {
     }
 }
 
+/// Checks large scaled and unscaled range.
 #[test]
 fn large_scaled_and_unscaled_range() {
     // DLMF 6.12.1-2 / 8.20.1, first four asymptotic terms at 1e6;
@@ -211,6 +214,7 @@ fn large_scaled_and_unscaled_range() {
     assert_eq!(e1(740.0), Ok(0.0));
 }
 
+/// Checks root centering and branch neighbors.
 #[test]
 fn root_centering_and_branch_neighbors() {
     // DLMF 6.13.1 root 0.372507410781366634461991866580...
@@ -291,6 +295,7 @@ fn root_centering_and_branch_neighbors() {
     );
 }
 
+/// Checks deterministic identities.
 #[test]
 fn deterministic_identities() {
     for x in [

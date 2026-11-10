@@ -62,6 +62,7 @@ pub enum Error {
 }
 
 impl std::fmt::Display for Error {
+    /// Writes the error description to formatter `f` and returns the formatting result.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(match self {
             Self::InvalidInput => "invalid integration arguments",
@@ -152,6 +153,7 @@ where
     Ok((sign * value, error))
 }
 
+/// Checks that absolute `abs` and relative `rel` tolerances define a valid stopping criterion.
 fn validate_tolerances(abs: f64, rel: f64) -> Result<(), Error> {
     if !abs.is_finite()
         || !rel.is_finite()
@@ -165,6 +167,7 @@ fn validate_tolerances(abs: f64, rel: f64) -> Result<(), Error> {
     }
 }
 
+/// Checks finite bounds `a, b` and validates the requested `abs, rel` tolerances.
 fn validate_finite(a: f64, b: f64, abs: f64, rel: f64) -> Result<(), Error> {
     validate_tolerances(abs, rel)?;
     if !a.is_finite() || !b.is_finite() {
@@ -174,6 +177,7 @@ fn validate_finite(a: f64, b: f64, abs: f64, rel: f64) -> Result<(), Error> {
     }
 }
 
+/// Orders bounds `a, b` and returns `(lower, upper, sign)` for restoring the original integration direction.
 fn ordered(a: f64, b: f64) -> (f64, f64, f64) {
     if a <= b {
         (a, b, 1.0)
@@ -182,6 +186,7 @@ fn ordered(a: f64, b: f64) -> (f64, f64, f64) {
     }
 }
 
+/// Returns finite `x`, or a numerical-breakdown error for a nonfinite intermediate.
 fn finite(x: f64) -> Result<f64, Error> {
     if x.is_finite() {
         Ok(x)
@@ -190,6 +195,7 @@ fn finite(x: f64) -> Result<f64, Error> {
     }
 }
 
+/// Returns the larger of `abs` and `rel * abs(value)`, saturating at `f64::MAX`.
 fn target(abs: f64, rel: f64, value: f64) -> f64 {
     // Saturation keeps the target finite even for huge valid tolerances.
     abs.max((rel * value.abs()).min(f64::MAX))
@@ -202,10 +208,12 @@ struct Budget<F> {
 }
 
 impl<F: FnMut(f64) -> f64> Budget<F> {
+    /// Creates a callback budget for `f` allowing at most `limit` evaluations.
     fn new(f: F, limit: usize) -> Self {
         Self { f, used: 0, limit }
     }
 
+    /// Evaluates the callback at `x`, counting the call and rejecting exhausted budgets or nonfinite results.
     fn eval(&mut self, x: f64) -> Result<f64, Error> {
         finite(x)?;
         if self.used >= self.limit {
@@ -229,6 +237,7 @@ struct Sum {
 }
 
 impl Sum {
+    /// Adds `x` to the compensated sum, returning an error if its intermediate arithmetic is nonfinite.
     fn add(&mut self, x: f64) -> Result<(), Error> {
         let next = finite(self.value + x)?;
         let residual = if self.value.abs() >= x.abs() {
@@ -241,6 +250,7 @@ impl Sum {
         Ok(())
     }
 
+    /// Returns the compensated sum or an error if the final value is nonfinite.
     fn total(&self) -> Result<f64, Error> {
         finite(self.value + self.correction)
     }
@@ -250,6 +260,7 @@ impl Sum {
 mod tests {
     use super::*;
 
+    /// Checks budget counter cannot overflow.
     #[test]
     fn budget_counter_cannot_overflow() {
         let mut calls = 0;
@@ -267,6 +278,7 @@ mod tests {
         assert_eq!(calls, 1);
     }
 
+    /// Checks compensated residual and nonfinite accumulation.
     #[test]
     fn compensated_residual_and_nonfinite_accumulation() {
         let mut sum = Sum::default();

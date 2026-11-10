@@ -6,6 +6,7 @@ mod support;
 use gsl_oxide_statistics::*;
 use support::{close, positive_zero};
 
+/// Builds a running statistics accumulator by pushing all observations in `data`.
 fn accumulate(data: &[f64]) -> RunningStatistics {
     let mut result = RunningStatistics::new();
     for &value in data {
@@ -14,6 +15,7 @@ fn accumulate(data: &[f64]) -> RunningStatistics {
     result
 }
 
+/// Checks accumulator `s` against expected count, mean, and variances using the provided tolerances.
 fn anchor(
     s: &RunningStatistics,
     count: usize,
@@ -44,6 +46,7 @@ fn anchor(
     }
 }
 
+/// Compares accumulator `s` against batch statistics of `data` with relative tolerance `rel`.
 fn compare(s: &RunningStatistics, data: &[f64], rel: f64) {
     anchor(
         s,
@@ -56,6 +59,7 @@ fn compare(s: &RunningStatistics, data: &[f64], rel: f64) {
     );
 }
 
+/// Checks independent anchors and deterministic orders.
 #[test]
 fn independent_anchors_and_deterministic_orders() {
     let b = 2.0_f64.powi(40);
@@ -89,6 +93,7 @@ fn independent_anchors_and_deterministic_orders() {
     }
 }
 
+/// Checks every split including empty and unequal chunks.
 #[test]
 fn every_split_including_empty_and_unequal_chunks() {
     let b = 2.0_f64.powi(40);
@@ -118,6 +123,7 @@ fn every_split_including_empty_and_unequal_chunks() {
     anchor(&singleton, 10, 9., 9., 10., 0., 4e-16);
 }
 
+/// Checks singleton chunks sequential and balanced trees.
 #[test]
 fn singleton_chunks_sequential_and_balanced_trees() {
     let data = [-8., -3., 0., 1., 2., 5., 6., 13.];
@@ -147,6 +153,7 @@ fn singleton_chunks_sequential_and_balanced_trees() {
     compare(&uneven, &data, 2e-15);
 }
 
+/// Checks difficult inputs and sub ulp mean residual.
 #[test]
 fn difficult_inputs_and_sub_ulp_mean_residual() {
     // Compensation must preserve delta's low part as well as mean increments.
@@ -190,6 +197,7 @@ fn difficult_inputs_and_sub_ulp_mean_residual() {
     close(s.population_variance().unwrap(), 1e300 / 3., 0., 7e-16);
 }
 
+/// Checks degenerate inputs reset and reuse.
 #[test]
 fn degenerate_inputs_reset_and_reuse() {
     let mut s = RunningStatistics::default();
@@ -223,6 +231,7 @@ fn degenerate_inputs_reset_and_reuse() {
     anchor(&s, 5, 3., 2., 2.5, 0., 4e-16);
 }
 
+/// Checks rejected pushes and merges preserve state and allow continuation.
 #[test]
 fn rejected_pushes_and_merges_preserve_state_and_allow_continuation() {
     for initial in [vec![], vec![1., 2., 3.]] {

@@ -11,6 +11,7 @@ struct Interval {
 // Recompute compensated totals from active leaves, rather than subtracting a
 // parent's error from an accumulating total. No negative bookkeeping residuals
 // can hide outstanding error, and cancellation between segments remains visible.
+/// Refines the seeded `(a, b, part)` intervals using callback `f` until absolute `abs` or relative `rel` tolerance is met. Returns the integral and estimated absolute error, or a sampling, subdivision, or roundoff error.
 pub(super) fn run(
     f: &mut impl FnMut(f64, u8) -> Result<f64, Error>,
     seeds: impl IntoIterator<Item = (f64, f64, u8)>,
@@ -88,6 +89,7 @@ mod tests {
     use super::*;
     use crate::Budget;
 
+    /// Checks repeated ineffective subdivisions take the stagnation path.
     #[test]
     fn repeated_ineffective_subdivisions_take_the_stagnation_path() {
         // Every 15-sample rule sees the same normalized pattern. Both children

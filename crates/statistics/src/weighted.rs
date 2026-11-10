@@ -8,6 +8,7 @@ struct Prepared {
     mean: f64,
 }
 
+/// Validates `data` and `weights`, then returns the prepared weighted center and scaling information.
 fn prepare(data: &[f64], weights: &[f64]) -> Result<Prepared, Error> {
     if data.len() != weights.len() {
         return Err(Error::LengthMismatch);
@@ -79,6 +80,7 @@ pub fn weighted_mean(data: &[f64], weights: &[f64]) -> Result<f64, Error> {
     Ok(prepare(data, weights)?.mean)
 }
 
+/// Computes weighted variance of `data`; `reliability` selects the reliability-weight correction.
 fn variance(data: &[f64], weights: &[f64], reliability: bool) -> Result<f64, Error> {
     let p = prepare(data, weights)?;
     if reliability && p.positive < 2 {

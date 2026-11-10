@@ -1,6 +1,7 @@
 use crate::{beta_cdf, beta_survival, positive, probability, shaped::gamma_unit_tails, Error};
 use gsl_oxide_special::beta::ln_beta;
 
+/// Returns binomial lower and upper tails at count `k` for success probability `p` and `trials` trials.
 fn binomial_tails(k: u32, p: f64, trials: u32) -> Result<(f64, f64), Error> {
     probability(p)?;
     if k >= trials {
@@ -20,6 +21,7 @@ pub fn binomial_survival(k: u32, p: f64, trials: u32) -> Result<f64, Error> {
     Ok(binomial_tails(k, p, trials)?.1)
 }
 
+/// Returns Poisson lower and upper tails at count `k` for the nonnegative `mean`.
 fn poisson_tails(k: u32, mean: f64) -> Result<(f64, f64), Error> {
     if !mean.is_finite() || mean < 0.0 {
         return Err(Error::Domain);
@@ -40,6 +42,7 @@ pub fn poisson_survival(k: u32, mean: f64) -> Result<f64, Error> {
     Ok(poisson_tails(k, mean)?.1)
 }
 
+/// Returns geometric lower and upper tails at trial count `k` for success probability `p`.
 fn geometric_tails(k: u32, p: f64) -> Result<(f64, f64), Error> {
     probability(p)?;
     if k == 0 {
@@ -58,6 +61,7 @@ pub fn geometric_survival(k: u32, p: f64) -> Result<f64, Error> {
     Ok(geometric_tails(k, p)?.1)
 }
 
+/// Returns negative-binomial tails at failure count `k` for probability `p` and required `successes`.
 fn negative_binomial_tails(k: u32, p: f64, successes: f64) -> Result<(f64, f64), Error> {
     probability(p)?;
     positive(successes)?;
@@ -84,6 +88,7 @@ pub fn pascal_survival(k: u32, p: f64, successes: u32) -> Result<f64, Error> {
     negative_binomial_survival(k, p, f64::from(successes))
 }
 
+/// Returns the natural logarithm of the binomial coefficient `n choose k` for `k <= n`.
 fn log_choose(n: u64, k: u64) -> Result<f64, Error> {
     let k = k.min(n - k);
     if k < 128 {
@@ -95,6 +100,7 @@ fn log_choose(n: u64, k: u64) -> Result<f64, Error> {
     }
 }
 
+/// Returns hypergeometric tails at `k` for `tagged` and `untagged` population counts and `draws` draws, or an error for invalid inputs or nonconvergence.
 fn hypergeometric_tails(
     k: u32,
     tagged: u32,

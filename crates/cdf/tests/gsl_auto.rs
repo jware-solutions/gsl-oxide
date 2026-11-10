@@ -6,6 +6,7 @@ mod support;
 use gsl_oxide_cdf::*;
 use support::*;
 
+/// Checks GSL-generated beta distribution reference values.
 #[test]
 fn auto_beta() {
     check!(
@@ -286,6 +287,7 @@ fn auto_beta() {
     );
 }
 
+/// Checks GSL-generated Fisher F distribution reference values.
 #[test]
 fn auto_fdist() {
     check!(
@@ -554,6 +556,7 @@ fn auto_fdist() {
     );
 }
 
+/// Checks GSL-generated Cauchy distribution reference values.
 #[test]
 fn auto_cauchy() {
     check!(
@@ -1338,6 +1341,7 @@ fn auto_cauchy() {
     );
 }
 
+/// Checks GSL-generated normal distribution reference values.
 #[test]
 fn auto_gaussian() {
     check!(
@@ -1978,6 +1982,7 @@ fn auto_gaussian() {
     );
 }
 
+/// Checks GSL-generated Laplace distribution reference values.
 #[test]
 fn auto_laplace() {
     check!(
@@ -2642,6 +2647,7 @@ fn auto_laplace() {
     );
 }
 
+/// Checks GSL-generated Rayleigh distribution reference values.
 #[test]
 fn auto_rayleigh() {
     check!(
@@ -2994,6 +3000,7 @@ fn auto_rayleigh() {
     );
 }
 
+/// Checks GSL-generated uniform distribution reference values.
 #[test]
 fn auto_flat() {
     check!(
@@ -3286,6 +3293,7 @@ fn auto_flat() {
     );
 }
 
+/// Checks GSL-generated lognormal distribution reference values.
 #[test]
 fn auto_lognormal() {
     check!(
@@ -3734,6 +3742,7 @@ fn auto_lognormal() {
     );
 }
 
+/// Checks GSL-generated gamma distribution reference values.
 #[test]
 fn auto_gamma() {
     check!(
@@ -4110,6 +4119,7 @@ fn auto_gamma() {
     );
 }
 
+/// Checks GSL-generated chi-squared distribution reference values.
 #[test]
 fn auto_chisq() {
     check!(
@@ -4504,6 +4514,7 @@ fn auto_chisq() {
     );
 }
 
+/// Checks GSL-generated Student t distribution reference values.
 #[test]
 fn auto_tdist() {
     check!(
@@ -5276,6 +5287,7 @@ fn auto_tdist() {
     );
 }
 
+/// Checks GSL-generated Gumbel type I distribution reference values.
 #[test]
 fn auto_gumbel1() {
     check!(
@@ -5928,6 +5940,7 @@ fn auto_gumbel1() {
     );
 }
 
+/// Checks GSL-generated Gumbel type II distribution reference values.
 #[test]
 fn auto_gumbel2() {
     check!(
@@ -6292,6 +6305,7 @@ fn auto_gumbel2() {
     );
 }
 
+/// Checks GSL-generated Weibull distribution reference values.
 #[test]
 fn auto_weibull() {
     check!(
@@ -6644,6 +6658,7 @@ fn auto_weibull() {
     );
 }
 
+/// Checks GSL-generated Pareto distribution reference values.
 #[test]
 fn auto_pareto() {
     check!(
@@ -6990,6 +7005,7 @@ fn auto_pareto() {
     );
 }
 
+/// Checks GSL-generated logistic distribution reference values.
 #[test]
 fn auto_logistic() {
     check!(
@@ -7654,6 +7670,7 @@ fn auto_logistic() {
     );
 }
 
+/// Checks GSL-generated large-scale gamma distribution reference values.
 #[test]
 fn auto_gammalarge() {
     check!(

@@ -8,6 +8,7 @@ use gsl_oxide_special::{
 mod support;
 use support::assert_close;
 
+/// Checks erfc anchors and tail bounds.
 #[test]
 fn erfc_anchors_and_tail_bounds() {
     // Published erfc(10) example and erf(0.5) example:
@@ -64,6 +65,7 @@ fn erfc_anchors_and_tail_bounds() {
     assert_eq!(erfc(27.5), 0.0);
 }
 
+/// Checks incomplete gamma anchors and closed forms.
 #[test]
 fn incomplete_gamma_anchors_and_closed_forms() {
     // Published unregularized values divided by known Gamma(10)=9!,
@@ -164,6 +166,7 @@ fn incomplete_gamma_anchors_and_closed_forms() {
     );
 }
 
+/// Checks incomplete gamma regions and errors.
 #[test]
 fn incomplete_gamma_regions_and_errors() {
     for a in [0.1_f64, 0.25, 0.5, 0.99, 1.01, 10.0, 16.0, 1000.0, 1e6] {
@@ -211,6 +214,7 @@ fn incomplete_gamma_regions_and_errors() {
     );
 }
 
+/// Checks incomplete beta closed forms and anchors.
 #[test]
 fn incomplete_beta_closed_forms_and_anchors() {
     // Published I_.25(1,2)=.4375:
@@ -290,6 +294,7 @@ fn incomplete_beta_closed_forms_and_anchors() {
     );
 }
 
+/// Checks published beta tails and large shape anchor.
 #[test]
 fn published_beta_tails_and_large_shape_anchor() {
     // Published scalar examples, 5e-14 relative for log/CF rounding:
@@ -362,6 +367,7 @@ fn published_beta_tails_and_large_shape_anchor() {
     }
 }
 
+/// Checks incomplete beta regions and errors.
 #[test]
 fn incomplete_beta_regions_and_errors() {
     for (a, b) in [
@@ -421,6 +427,7 @@ fn incomplete_beta_regions_and_errors() {
     );
 }
 
+/// Checks tiny shape tail regressions.
 #[test]
 fn tiny_shape_tail_regressions() {
     // Integrating t^(a-1)(1-t) gives I_x(a,2)=x^a[1+a(1-x)].

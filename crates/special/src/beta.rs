@@ -7,6 +7,7 @@ use crate::{
 };
 
 // log(a B(a,b)) for 0<a<=1/4, retaining O(a) when this approaches zero.
+/// Returns `ln(a * B(a,b))` for small positive `a` and positive `b`, preserving small logarithmic corrections.
 pub(crate) fn log_a_beta(a: f64, mut b: f64) -> f64 {
     let mut shift = 0.0;
     while b < 16.0 {

@@ -64,6 +64,7 @@ pub enum Error {
 }
 
 impl std::fmt::Display for Error {
+    /// Writes the error description to formatter `f` and returns the formatting result.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(match self {
             Self::Domain => "argument outside the function's real domain",
@@ -79,6 +80,7 @@ impl std::error::Error for Error {}
 pub(crate) const LN_SQRT_2_PI: f64 = 0.918_938_533_204_672_8;
 pub(crate) const EULER: f64 = 0.577_215_664_901_532_9;
 
+/// Returns `exp(log)`, preserving underflow and reporting overflow or numerical breakdown.
 pub(crate) fn finite_exp(log: f64) -> Result<f64, Error> {
     let value = log.exp();
     if value.is_infinite() {
@@ -91,6 +93,7 @@ pub(crate) fn finite_exp(log: f64) -> Result<f64, Error> {
 }
 
 // log(1+u)-u, retaining the quadratic term near zero.
+/// Returns `ln(1+u) - u`, retaining the quadratic term for small `u`.
 pub(crate) fn log1pmx(u: f64) -> f64 {
     if u.abs() >= 0.125 {
         return u.ln_1p() - u;

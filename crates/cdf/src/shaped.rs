@@ -18,6 +18,7 @@ macro_rules! family {
     };
 }
 
+/// Checks that gamma `shape` is positive, finite, and within the supported numerical limit.
 fn gamma_shape(shape: f64) -> Result<(), Error> {
     positive(shape)?;
     if shape > 1e8 {
@@ -30,6 +31,7 @@ fn gamma_shape(shape: f64) -> Result<(), Error> {
 // Extend the special crate's gamma tails beyond its documented 1e6 limit.
 // The deviance form of the Stirling prefactor retains precision near x=a;
 // a positive series / modified Lentz fraction evaluates the smaller tail.
+/// Returns the lower and upper gamma probabilities for positive `shape` and unit-scale observation `x`, or a range or convergence error.
 pub(crate) fn gamma_unit_tails(shape: f64, x: f64) -> Result<(f64, f64), Error> {
     gamma_shape(shape)?;
     if shape <= 1e6 {
@@ -110,6 +112,7 @@ pub(crate) fn gamma_unit_tails(shape: f64, x: f64) -> Result<(f64, f64), Error> 
     })
 }
 
+/// Protects a continued-fraction denominator `x` from zero while preserving its sign.
 fn guard(x: f64) -> f64 {
     if x.abs() < 1e-300 {
         1e-300_f64.copysign(x)
@@ -118,6 +121,7 @@ fn guard(x: f64) -> f64 {
     }
 }
 
+/// Returns gamma lower and upper tails at `x` for positive `shape` and `scale`.
 fn gamma_tails(x: f64, shape: f64, scale: f64) -> Result<(f64, f64), Error> {
     observation(x)?;
     gamma_shape(shape)?;
@@ -130,6 +134,7 @@ fn gamma_tails(x: f64, shape: f64, scale: f64) -> Result<(f64, f64), Error> {
     gamma_unit_tails(shape, unit)
 }
 
+/// Returns `ln Gamma(1+shape)`, retaining small values when adding one would round away `shape`.
 fn log_gamma_one_plus(shape: f64) -> Result<f64, Error> {
     if shape < 1e-8 {
         // DLMF 5.7.3, retaining the linear term when 1+shape rounds to 1.
@@ -141,6 +146,7 @@ fn log_gamma_one_plus(shape: f64) -> Result<f64, Error> {
     }
 }
 
+/// Inverts the gamma tail at probability `p` for `shape, scale`; `upper` selects the survival inverse.
 fn gamma_inverse(p: f64, upper: bool, shape: f64, scale: f64) -> Result<f64, Error> {
     probability(p)?;
     gamma_shape(shape)?;
@@ -186,10 +192,12 @@ family!(
     gamma_inverse
 );
 
+/// Returns chi-squared lower and upper tails at `x` for positive degrees of freedom `degrees`.
 fn chi_tails(x: f64, degrees: f64) -> Result<(f64, f64), Error> {
     positive(degrees)?;
     gamma_tails(x, degrees / 2.0, 2.0)
 }
+/// Inverts a chi-squared tail at `p` for `degrees`; `upper` selects the survival inverse.
 fn chi_inverse(p: f64, upper: bool, degrees: f64) -> Result<f64, Error> {
     positive(degrees)?;
     gamma_inverse(p, upper, degrees / 2.0, 2.0)
@@ -205,6 +213,7 @@ family!(
     chi_inverse
 );
 
+/// Validates positive finite beta shapes `a, b` against the supported numerical limit.
 fn beta_shapes(a: f64, b: f64) -> Result<(), Error> {
     positive(a)?;
     positive(b)?;
@@ -215,6 +224,7 @@ fn beta_shapes(a: f64, b: f64) -> Result<(), Error> {
     }
 }
 
+/// Returns beta lower and upper tails at `x` for positive shapes `a, b`, including support limits.
 fn beta_tails(x: f64, a: f64, b: f64) -> Result<(f64, f64), Error> {
     observation(x)?;
     beta_shapes(a, b)?;
@@ -270,6 +280,7 @@ fn beta_tails(x: f64, a: f64, b: f64) -> Result<(f64, f64), Error> {
     Err(Error::NonConvergence)
 }
 
+/// Inverts the beta tail at probability `p` for shapes `a, b`; `upper` selects the survival inverse.
 fn beta_inverse(p: f64, upper: bool, a: f64, b: f64) -> Result<f64, Error> {
     probability(p)?;
     beta_shapes(a, b)?;
@@ -302,6 +313,7 @@ family!(
     beta_inverse
 );
 
+/// Returns Fisher F lower and upper tails at `x` for numerator and denominator degrees of freedom.
 fn fisher_tails(
     x: f64,
     numerator_degrees: f64,
@@ -328,6 +340,7 @@ fn fisher_tails(
         Ok((p, q))
     }
 }
+/// Inverts a Fisher F tail at `p` for numerator and denominator degrees of freedom; `upper` selects the survival inverse.
 fn fisher_inverse(
     p: f64,
     upper: bool,
@@ -376,6 +389,7 @@ family!(
     fisher_inverse
 );
 
+/// Returns Student t lower and upper tails at `x` for positive degrees of freedom `degrees`.
 fn student_tails(x: f64, degrees: f64) -> Result<(f64, f64), Error> {
     observation(x)?;
     beta_shapes(0.5, degrees / 2.0)?;
@@ -408,6 +422,7 @@ fn student_tails(x: f64, degrees: f64) -> Result<(f64, f64), Error> {
         (1.0 - small, small)
     })
 }
+/// Inverts a Student t tail at `p` for `degrees`; `upper` selects the survival inverse.
 fn student_inverse(p: f64, upper: bool, degrees: f64) -> Result<f64, Error> {
     probability(p)?;
     beta_shapes(0.5, degrees / 2.0)?;
@@ -443,6 +458,7 @@ family!(
     student_inverse
 );
 
+/// Returns exponential-power lower and upper tails at `x` for positive `scale` and `shape`.
 fn exponential_power_tails(x: f64, scale: f64, shape: f64) -> Result<(f64, f64), Error> {
     observation(x)?;
     positive(scale)?;

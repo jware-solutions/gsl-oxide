@@ -10,6 +10,7 @@ const MAX_SHAPE: f64 = 1_000_000.0;
 
 // log(x^a exp(-x)/Gamma(a)); deviance form prevents catastrophic
 // cancellation at the large-shape transition. DLMF 8.11.6, 5.11.1.
+/// Returns `ln(x^a exp(-x) / Gamma(a))` for positive shape `a` and argument `x`.
 fn prefactor(a: f64, x: f64) -> f64 {
     if a >= 16.0 {
         let u = (x - a) / a;
@@ -24,6 +25,7 @@ fn prefactor(a: f64, x: f64) -> f64 {
     }
 }
 
+/// Returns regularized gamma lower and upper tails for `a, x`, limiting the series or fraction to `limit` terms.
 fn tails(a: f64, x: f64, limit: usize) -> Result<(f64, f64), Error> {
     if !a.is_finite() || a <= 0.0 || x.is_nan() || x < 0.0 {
         return Err(Error::Domain);
@@ -109,6 +111,7 @@ fn tails(a: f64, x: f64, limit: usize) -> Result<(f64, f64), Error> {
     Err(Error::NonConvergence)
 }
 
+/// Replaces an excessively small denominator `x` by a signed minimum magnitude for continued fractions.
 pub(crate) fn guard(x: f64) -> f64 {
     if x.abs() < 1.0e-300 {
         1.0e-300_f64.copysign(x)
@@ -117,6 +120,7 @@ pub(crate) fn guard(x: f64) -> f64 {
     }
 }
 
+/// Returns probability tails `(p, q)` when both lie in `[0,1]`, otherwise reports numerical nonconvergence.
 fn checked(p: f64, q: f64) -> Result<(f64, f64), Error> {
     if (0.0..=1.0).contains(&p) && (0.0..=1.0).contains(&q) {
         Ok((p, q))
@@ -158,6 +162,7 @@ pub fn upper_regularized(a: f64, x: f64) -> Result<f64, Error> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    /// Checks exhaustion is an error.
     #[test]
     fn exhaustion_is_an_error() {
         for (a, x) in [(10.0, 9.0), (10.0, 12.0), (0.01, 0.5)] {

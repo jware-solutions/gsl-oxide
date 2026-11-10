@@ -32,6 +32,7 @@ use std::f64::consts::{FRAC_1_SQRT_2, PI};
 const MAX_ORDER: u32 = 1000;
 const MAX_X: f64 = 1e6;
 
+/// Validates order `n` and argument `x`; `positive` selects the strictly positive domain. Returns the argument magnitude or an error.
 fn validate(n: u32, x: f64, positive: bool) -> Result<f64, Error> {
     if x.is_nan() || (positive && x <= 0.0) {
         return Err(Error::Domain);
@@ -42,6 +43,7 @@ fn validate(n: u32, x: f64, positive: bool) -> Result<f64, Error> {
     Ok(x.abs())
 }
 
+/// Applies integer-order parity to `value` for argument `x` and order `n`.
 fn parity(n: u32, x: f64, value: f64) -> f64 {
     if n % 2 == 1 && x.is_sign_negative() {
         -value
@@ -52,6 +54,7 @@ fn parity(n: u32, x: f64, value: f64) -> f64 {
 
 // DLMF 10.2.2/10.25.2. For x<=1 this series is well conditioned for
 // every supported order. Logarithmic leading factors preserve tiny results.
+/// Evaluates the small-argument series for order `n` and argument `x`; `modified` selects I instead of J.
 fn small(n: u32, x: f64, modified: bool) -> f64 {
     if x == 0.0 {
         return if n == 0 { 1.0 } else { 0.0 };
@@ -82,6 +85,7 @@ fn small(n: u32, x: f64, modified: bool) -> f64 {
 
 // DLMF 10.8.2 / 10.31.2 and derivatives Y1=-Y0', K1=-K0'.
 // Harmonic-number coefficients follow directly from those formulas.
+/// Returns the small-argument order-zero and order-one pair at `x`; `modified` selects K instead of Y.
 fn singular_small(x: f64, modified: bool) -> (f64, f64) {
     let l = x.ln() - std::f64::consts::LN_2 + EULER;
     let f0 = small(0, x, modified);
@@ -123,6 +127,7 @@ fn singular_small(x: f64, modified: bool) -> (f64, f64) {
 // Steps <=1/4 from x>=1 have analytic radius >=1, so 32 terms give a
 // negligible truncation error. At most 124 steps, avoiding long alternating
 // series cancellation. Both J0 and Y0 are stable oscillatory ODE solutions.
+/// Advances a Bessel solution and its derivative from `center` to `target`, returning the order-zero and order-one values.
 fn march(mut center: f64, target: f64, mut value: f64, mut derivative: f64) -> (f64, f64) {
     for _ in 0..124 {
         if center >= target {
@@ -152,6 +157,7 @@ fn march(mut center: f64, target: f64, mut value: f64, mut derivative: f64) -> (
 // Hankel expansion DLMF 10.17.1, 10.17.3--4. Coefficients are products
 // (4n²-(2k-1)²)/(8k), generated here. Only base orders and x>=32 are used;
 // stop at small terms or before the least term starts increasing.
+/// Evaluates the large-`x` asymptotic expansion for order `n`; `second` selects Y instead of J.
 fn oscillatory_asym(n: u32, x: f64, second: bool) -> f64 {
     let mut even = 1.0;
     let mut odd = 0.0;
@@ -192,6 +198,7 @@ fn oscillatory_asym(n: u32, x: f64, second: bool) -> f64 {
         }
 }
 
+/// Returns the order-zero and order-one J or Y values at positive `x`, selected by `second`.
 fn jy_base(x: f64, second: bool) -> (f64, f64) {
     if x <= 1.0 {
         return if second {
@@ -215,6 +222,7 @@ fn jy_base(x: f64, second: bool) -> (f64, f64) {
 }
 
 // DLMF 10.40.1--2, same product coefficients as the Hankel expansion.
+/// Returns the exponentially scaled large-`x` I or K asymptotic for order `n`; `second` selects K.
 fn modified_asym(n: u32, x: f64, second: bool) -> f64 {
     let mut term = 1.0_f64;
     let mut sum = 1.0;
@@ -238,6 +246,7 @@ fn modified_asym(n: u32, x: f64, second: bool) -> f64 {
     }
 }
 
+/// Returns exponentially scaled I of base order `n` at nonnegative `x`.
 fn i_base(n: u32, x: f64) -> f64 {
     if x >= 32.0 {
         return modified_asym(n, x, false);
@@ -262,6 +271,7 @@ fn i_base(n: u32, x: f64) -> f64 {
 // refinement. Truncate at x(cosh(t)-1)>=48; beyond that the integral is
 // < 1e-19 of the base value for 1<=x<=32. This is a private K kernel,
 // not a general quadrature API. At most 7 refinements and 4096 samples each.
+/// Computes scaled K0 and K1 at `x` by at most `refinements` quadrature refinements; reports nonconvergence.
 fn k_integral(x: f64, refinements: usize) -> Result<(f64, f64), Error> {
     let mut previous = (0.0_f64, 0.0_f64);
     for level in 0..refinements {
@@ -297,6 +307,7 @@ fn k_integral(x: f64, refinements: usize) -> Result<(f64, f64), Error> {
     Err(Error::NonConvergence)
 }
 
+/// Returns exponentially scaled K0 and K1 at positive `x`, or an error if quadrature fails.
 fn k_base(x: f64) -> Result<(f64, f64), Error> {
     if x <= 1.0 {
         let (v0, v1) = singular_small(x, true);
@@ -310,6 +321,7 @@ fn k_base(x: f64) -> Result<(f64, f64), Error> {
 
 // Miller recurrence, normalized with the larger of J0/J1.
 // Rescale the saved target along with both recurrence values.
+/// Evaluates J of order `n` at `x` using a backward recurrence starting at `start` and normalizing against base orders.
 fn j_backward(n: u32, x: f64, start: u32) -> f64 {
     let mut next = 0.0;
     let mut current = 1.0;
@@ -339,6 +351,7 @@ fn j_backward(n: u32, x: f64, start: u32) -> f64 {
     }
 }
 
+/// Returns J of order `n` at `x`, allowing `refinements` recurrence checks before reporting nonconvergence.
 fn j_value(n: u32, x: f64, refinements: usize) -> Result<f64, Error> {
     if x <= 1.0 {
         return Ok(small(n, x, false));
@@ -371,10 +384,12 @@ fn j_value(n: u32, x: f64, refinements: usize) -> Result<f64, Error> {
     Ok(b)
 }
 
+/// Returns the logarithm of exponentially scaled I of order `n` at `x`, or a convergence error.
 fn i_log(n: u32, x: f64) -> Result<f64, Error> {
     i_log_kernel(n, x, 8)
 }
 
+/// Evaluates the logarithm of scaled I for `n, x`, limiting backward-recurrence convergence checks to `refinements`.
 fn i_log_kernel(n: u32, x: f64, refinements: usize) -> Result<f64, Error> {
     if n <= 1 {
         return Ok(i_base(n, x).ln());
@@ -410,6 +425,7 @@ fn i_log_kernel(n: u32, x: f64, refinements: usize) -> Result<f64, Error> {
 
 // Logarithmic Miller ratios avoid losing I_n when exp(-x)I_n underflows
 // but I_n itself remains representable (e.g. n=1000, x=400).
+/// Returns log scaled I for order `n` at `x`, using backward recurrence beginning at `start`.
 fn i_backward_log(n: u32, x: f64, start: u32) -> f64 {
     let mut ratio = 0.0;
     let mut log = i_base(0, x).ln();
@@ -427,6 +443,7 @@ fn i_backward_log(n: u32, x: f64, start: u32) -> f64 {
 }
 
 // Dominant-solution forward recurrence, with logarithmic scale tracking.
+/// Advances a dominant Bessel recurrence to order `n` at `x` from `first, second`; `modified` selects K. Returns the scaled value and its logarithmic scale.
 fn forward_log(
     n: u32,
     x: f64,
@@ -545,6 +562,7 @@ pub fn i1_scaled(x: f64) -> Result<f64, Error> {
 pub fn i_n_scaled(n: u32, x: f64) -> Result<f64, Error> {
     i_evaluate(n, x, true)
 }
+/// Evaluates I of order `n` at `x`; `scaled` selects exponential scaling and range or convergence failures are errors.
 fn i_evaluate(n: u32, x: f64, scaled: bool) -> Result<f64, Error> {
     let a = validate(n, x, false)?;
     if a == 0.0 {
@@ -584,6 +602,7 @@ pub fn k1_scaled(x: f64) -> Result<f64, Error> {
 pub fn kn_scaled(n: u32, x: f64) -> Result<f64, Error> {
     k_evaluate(n, x, true)
 }
+/// Evaluates K of order `n` at positive `x`; `scaled` selects exponential scaling and range or convergence failures are errors.
 fn k_evaluate(n: u32, x: f64, scaled: bool) -> Result<f64, Error> {
     validate(n, x, true)?;
     let (a, b) = k_base(x)?;
@@ -597,11 +616,13 @@ fn k_evaluate(n: u32, x: f64, scaled: bool) -> Result<f64, Error> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    /// Checks integral exhaustion.
     #[test]
     fn integral_exhaustion() {
         assert_eq!(k_integral(2.0, 1), Err(Error::NonConvergence));
         assert!(k_integral(2.0, 7).is_ok());
     }
+    /// Checks miller exhaustion.
     #[test]
     fn miller_exhaustion() {
         assert_eq!(i_log_kernel(20, 15.0, 0), Err(Error::NonConvergence));

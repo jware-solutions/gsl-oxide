@@ -4,6 +4,7 @@ use gsl_oxide_cdf::*;
 use gsl_oxide_randist as randist;
 use support::{assert_relative, TEST_TOL2};
 
+/// Checks CDF and survival sums through `maximum` against `pdf`, then checks complementary probabilities.
 fn check_discrete(
     maximum: u32,
     pdf: impl Fn(u32) -> f64,
@@ -28,6 +29,7 @@ fn check_discrete(
     check_complements(0, maximum, cdf, survival);
 }
 
+/// Checks that `cdf` and `survival` are probabilities summing to one for each count in `[minimum, maximum]`.
 fn check_complements(
     minimum: u32,
     maximum: u32,
@@ -43,6 +45,7 @@ fn check_complements(
     }
 }
 
+/// Checks binomial.
 #[test]
 fn binomial() {
     check_discrete(
@@ -52,6 +55,7 @@ fn binomial() {
         |k| binomial_survival(k, 0.3, 5).unwrap(),
     );
 }
+/// Checks poisson.
 #[test]
 fn poisson() {
     check_discrete(
@@ -61,6 +65,7 @@ fn poisson() {
         |k| poisson_survival(k, 2.3).unwrap(),
     );
 }
+/// Checks geometric.
 #[test]
 fn geometric() {
     check_discrete(
@@ -70,6 +75,7 @@ fn geometric() {
         |k| geometric_survival(k, 0.3).unwrap(),
     );
 }
+/// Checks negative binomial.
 #[test]
 fn negative_binomial() {
     check_discrete(
@@ -79,6 +85,7 @@ fn negative_binomial() {
         |k| negative_binomial_survival(k, 0.3, 5.3).unwrap(),
     );
 }
+/// Checks pascal.
 #[test]
 fn pascal() {
     check_discrete(
@@ -88,6 +95,7 @@ fn pascal() {
         |k| pascal_survival(k, 0.3, 5).unwrap(),
     );
 }
+/// Checks hypergeometric.
 #[test]
 fn hypergeometric() {
     check_discrete(
@@ -97,6 +105,7 @@ fn hypergeometric() {
         |k| hypergeometric_survival(k, 7, 19, 13).unwrap(),
     );
 }
+/// Checks hypergeometric large populations.
 #[test]
 fn hypergeometric_large_populations() {
     // These two restricted ranges are enabled in GSL; its optional full

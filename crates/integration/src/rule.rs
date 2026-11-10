@@ -41,6 +41,7 @@ const G: [f64; 4] = [
     0.129_484_966_168_869_7,
 ];
 
+/// Returns sample `y` times interval half-width `half` and quadrature `weight`, reporting nonfinite products.
 pub(super) fn weighted(y: f64, half: f64, weight: f64) -> Result<f64, Error> {
     // Multiply by interval size first to preserve subnormal widths. Fall back
     // to weighting first when the unweighted intermediate would overflow.
@@ -58,6 +59,7 @@ pub(super) struct Estimate {
     pub(super) absolute: f64,
 }
 
+/// Returns the midpoint and half-width of ordered bounds `a, b`, or a subdivision error when no interior midpoint is representable.
 pub(super) fn geometry(a: f64, b: f64) -> Result<(f64, f64), Error> {
     let width = b - a;
     let (mid, half) = if width.is_finite() {
@@ -72,6 +74,7 @@ pub(super) fn geometry(a: f64, b: f64) -> Result<(f64, f64), Error> {
     }
 }
 
+/// Applies the embedded Gauss–Kronrod rule to callback `f` on `(a, b)` and returns its estimate, absolute error, and absolute integral estimate.
 pub(super) fn evaluate(
     f: &mut impl FnMut(f64) -> Result<f64, Error>,
     a: f64,
@@ -168,6 +171,7 @@ mod tests {
     use super::*;
     use crate::Budget;
 
+    /// Checks independent polynomial construction and moments.
     #[test]
     fn independent_polynomial_construction_and_moments() {
         assert!(X.windows(2).all(|w| w[0] < w[1]));
@@ -208,6 +212,7 @@ mod tests {
         }
     }
 
+    /// Checks mapping symmetry reuse and roundoff floor.
     #[test]
     fn mapping_symmetry_reuse_and_roundoff_floor() {
         let mut nodes = Vec::new();
@@ -243,6 +248,7 @@ mod tests {
         }
     }
 
+    /// Checks arithmetic and sample failures.
     #[test]
     fn arithmetic_and_sample_failures() {
         for y in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY] {

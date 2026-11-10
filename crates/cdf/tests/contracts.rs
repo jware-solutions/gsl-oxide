@@ -20,6 +20,7 @@ macro_rules! case {
     };
 }
 
+/// Returns representative continuous distributions and their CDF, survival, and inverse functions for contract tests.
 fn continuous_cases() -> Vec<Continuous> {
     let inf = f64::INFINITY;
     vec![
@@ -206,6 +207,7 @@ fn continuous_cases() -> Vec<Continuous> {
     ]
 }
 
+/// Checks endpoints and inverse round trips.
 #[test]
 fn endpoints_and_inverse_round_trips() {
     for c in continuous_cases() {
@@ -239,6 +241,7 @@ fn endpoints_and_inverse_round_trips() {
     assert_eq!(exponential_power_survival(f64::INFINITY, 1.0, 2.0), Ok(0.0));
 }
 
+/// Checks invalid observations and probabilities are errors.
 #[test]
 fn invalid_observations_and_probabilities_are_errors() {
     for c in continuous_cases() {
@@ -251,6 +254,7 @@ fn invalid_observations_and_probabilities_are_errors() {
     }
 }
 
+/// Checks invalid parameters are checked before support limits.
 #[test]
 fn invalid_parameters_are_checked_before_support_limits() {
     for bad in [f64::NAN, f64::INFINITY, -1.0, 0.0] {
@@ -345,6 +349,7 @@ fn invalid_parameters_are_checked_before_support_limits() {
     assert_eq!(beta_cdf(0.0, 1e8 + 1.0, 1.0), Err(Error::UnsupportedRange));
 }
 
+/// Checks discrete edges and widened population counts.
 #[test]
 fn discrete_edges_and_widened_population_counts() {
     for bad in [f64::NAN, -0.1, 1.1, f64::INFINITY] {
@@ -386,6 +391,7 @@ fn discrete_edges_and_widened_population_counts() {
     );
 }
 
+/// Checks very small tails and overflow.
 #[test]
 fn very_small_tails_and_overflow() {
     for p in [1e-300, 1e-100, 1e-20] {

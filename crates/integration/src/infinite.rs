@@ -41,6 +41,7 @@ pub fn integrate_lower_infinite<F: FnMut(f64) -> f64>(
     semi(f, b, -1.0, abs_tol, rel_tol, max_evals)
 }
 
+/// Evaluates the budgeted integrand at the point mapped from `t` and `boundary` in direction `sign`, including the Jacobian. Invalid mappings and nonfinite results return errors.
 fn transformed<F: FnMut(f64) -> f64>(
     budget: &mut Budget<F>,
     t: f64,
@@ -59,6 +60,7 @@ fn transformed<F: FnMut(f64) -> f64>(
     finite((budget.eval(x)? / t) / t)
 }
 
+/// Integrates `f` from `boundary` toward the infinity selected by `sign`, using tolerances `abs`, `rel` and callback limit `limit`; returns the estimate and absolute error.
 fn semi<F: FnMut(f64) -> f64>(
     f: F,
     boundary: f64,
@@ -110,6 +112,7 @@ pub fn integrate_infinite<F: FnMut(f64) -> f64>(
 mod tests {
     use super::*;
 
+    /// Checks transform overflow collapse and jacobian range.
     #[test]
     fn transform_overflow_collapse_and_jacobian_range() {
         let mut budget = Budget::new(|_| panic!("invalid transformed argument"), 10);

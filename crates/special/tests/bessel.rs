@@ -3,6 +3,7 @@ use gsl_oxide_special::{bessel::*, Error};
 mod support;
 use support::assert_close;
 
+/// Checks published anchors.
 #[test]
 fn published_anchors() {
     // Numerical examples, no oracle executed:
@@ -61,6 +62,7 @@ fn published_anchors() {
     );
 }
 
+/// Checks published intermediate and scaled anchors.
 #[test]
 fn published_intermediate_and_scaled_anchors() {
     // Published SciPy documentation examples, not library execution:
@@ -131,6 +133,7 @@ fn published_intermediate_and_scaled_anchors() {
     }
 }
 
+/// Checks larger order anchors and transition.
 #[test]
 fn larger_order_anchors_and_transition() {
     // Independent rational partial sums at x=1 (DLMF 10.2.2/10.25.2).
@@ -213,6 +216,7 @@ fn larger_order_anchors_and_transition() {
     }
 }
 
+/// Checks small values and zeros.
 #[test]
 fn small_values_and_zeros() {
     // Published numerical examples at x=1 (rounded to f64):
@@ -268,6 +272,7 @@ fn small_values_and_zeros() {
     }
 }
 
+/// Checks recurrence parity and wronskians.
 #[test]
 fn recurrence_parity_and_wronskians() {
     for x in [0.1_f64, 1.0, 2.0, 7.5, 20.0, 31.0, 32.0, 100.0, 1000.0] {
@@ -343,6 +348,7 @@ fn recurrence_parity_and_wronskians() {
     }
 }
 
+/// Checks scaled range and recovery.
 #[test]
 fn scaled_range_and_recovery() {
     for x in [0.1_f64, 1.0, 10.0, 32.0, 100.0, 700.0] {
@@ -390,6 +396,7 @@ fn scaled_range_and_recovery() {
     );
 }
 
+/// Checks boundaries and checked errors.
 #[test]
 fn boundaries_and_checked_errors() {
     for boundary in [1.0_f64, 32.0] {

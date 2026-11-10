@@ -2,11 +2,13 @@
 #![allow(clippy::excessive_precision)]
 use crate::{finite_quantile, observation, positive, probability, Error};
 
+/// Returns a normal tail from positive `x` and the supplied `rational` factor, splitting its exponential for accuracy.
 fn scaled_tail(x: f64, rational: f64) -> f64 {
     let rounded = (x * 16.0).floor() / 16.0;
     let remainder = 0.5 * (x - rounded) * (x + rounded);
     (-0.5 * rounded * rounded).exp() * (-remainder).exp() * rational
 }
+/// Returns the normal CDF offset from one half for a small argument `x`.
 fn small(x: f64) -> f64 {
     const A: [f64; 5] = [
         2.2352520354606839287,
@@ -30,6 +32,7 @@ fn small(x: f64) -> f64 {
     }
     x * (num + A[3]) / (den + B[3])
 }
+/// Returns the standard normal survival probability at nonnegative `x`.
 fn tail(x: f64) -> f64 {
     if x >= 39.0 {
         return 0.0;
@@ -93,9 +96,11 @@ fn tail(x: f64) -> f64 {
         scaled_tail(x, rational)
     }
 }
+/// Evaluates coefficient arrays `a` and `b` as a rational polynomial at `x`.
 fn rational(a: &[f64], b: &[f64], x: f64) -> f64 {
     a.iter().rev().fold(0.0, |v, c| v * x + c) / b.iter().rev().fold(0.0, |v, c| v * x + c)
 }
+/// Returns the central standard-normal quantile for centered probability `q`.
 fn inverse_small(q: f64) -> f64 {
     const A: [f64; 8] = [
         3.387132872796366608,
@@ -119,6 +124,7 @@ fn inverse_small(q: f64) -> f64 {
     ];
     q * rational(&A, &B, 0.180625 - q * q)
 }
+/// Returns the intermediate-tail normal quantile magnitude for transformed probability `r`.
 fn inverse_intermediate(r: f64) -> f64 {
     const A: [f64; 8] = [
         1.42343711074968357734,
@@ -142,6 +148,7 @@ fn inverse_intermediate(r: f64) -> f64 {
     ];
     rational(&A, &B, r - 1.6)
 }
+/// Returns the extreme-tail normal quantile magnitude for transformed probability `r`.
 fn inverse_tail(r: f64) -> f64 {
     const A: [f64; 8] = [
         6.6579046435011037772,

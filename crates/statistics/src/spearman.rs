@@ -41,6 +41,7 @@ pub fn spearman_correlation(x: &[f64], y: &[f64]) -> Result<f64, Error> {
 // Sort indices so ranks can be written back in the original pairing order.
 // All values have been validated; numerical equality deliberately ties zeros
 // even though total_cmp orders their signs separately.
+/// Returns the ranks of `data` in input order, assigning tied values their average rank.
 fn ranks(data: &[f64]) -> Vec<f64> {
     let mut order: Vec<usize> = (0..data.len()).collect();
     order.sort_unstable_by(|&a, &b| data[a].total_cmp(&data[b]));

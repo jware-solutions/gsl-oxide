@@ -4,6 +4,7 @@ use std::f64::consts::PI;
 mod support;
 use support::check;
 
+/// Checks endpoint roots and logarithms.
 #[test]
 fn endpoint_roots_and_logarithms() {
     // Elementary antiderivatives: 2sqrt(x), x*log(x)-x; the beta(1/2,1/2)
@@ -44,6 +45,7 @@ fn endpoint_roots_and_logarithms() {
     }
 }
 
+/// Checks nonsingular inputs and shifted endpoint.
 #[test]
 fn nonsingular_inputs_and_shifted_endpoint() {
     check(
@@ -66,6 +68,7 @@ fn nonsingular_inputs_and_shifted_endpoint() {
     );
 }
 
+/// Checks unresolved endpoint contribution and divergence fail.
 #[test]
 fn unresolved_endpoint_contribution_and_divergence_fail() {
     assert!(matches!(
@@ -75,6 +78,7 @@ fn unresolved_endpoint_contribution_and_divergence_fail() {
     assert!(integrate_singular(|x| 1.0 / x, 0.0, 1.0, 1e-10, 0.0, 2000).is_err());
 }
 
+/// Checks representative estimator quality and tiny interval resolution.
 #[test]
 fn representative_estimator_quality_and_tiny_interval_resolution() {
     for (f, expected, tolerance) in [

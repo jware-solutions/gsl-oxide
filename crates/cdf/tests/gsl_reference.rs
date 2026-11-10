@@ -7,6 +7,7 @@ mod support;
 use gsl_oxide_cdf::*;
 use support::*;
 
+/// Checks ugaussian.
 #[test]
 fn ugaussian() {
     check!(standard_normal_cdf, (0.0), 0.5, TEST_TOL0);
@@ -211,6 +212,7 @@ fn ugaussian() {
     );
 }
 
+/// Checks ugaussianinv.
 #[test]
 fn ugaussianinv() {
     check!(standard_normal_quantile, (0.9999997133), 5.0, 1e-4);
@@ -399,6 +401,7 @@ fn ugaussianinv() {
     check!(standard_normal_inverse_survival, (0.9999997133), -5.0, 1e-4);
 }
 
+/// Checks exponential.
 #[test]
 fn exponential() {
     check!(
@@ -424,6 +427,7 @@ fn exponential() {
     check!(exponential_survival, (1000.0, 0.7), 0.0, TEST_TOL6);
 }
 
+/// Checks exponentialinv.
 #[test]
 fn exponentialinv() {
     check!(
@@ -452,6 +456,7 @@ fn exponentialinv() {
     );
 }
 
+/// Checks exppow.
 #[test]
 fn exppow() {
     check!(exponential_power_cdf, (-1000.0, 0.7, 1.8), 0.0, TEST_TOL6);
@@ -518,6 +523,7 @@ fn exppow() {
     );
 }
 
+/// Checks tdist.
 #[test]
 fn tdist() {
     check!(student_t_cdf, (0.0, 1.0), 0.5, TEST_TOL6);
@@ -1399,6 +1405,7 @@ fn tdist() {
     check!(student_t_survival, (-10000.0, 300.0), 1.0, TEST_TOL6);
 }
 
+/// Checks fdist.
 #[test]
 fn fdist() {
     check!(fisher_f_cdf, (0.0, 1.2, 1.3), 0.0, 0.0);
@@ -1943,6 +1950,7 @@ fn fdist() {
     check!(fisher_f_survival, (10000.0, 200.0, 500.0), 0.0, 0.0);
 }
 
+/// Checks finv.
 #[test]
 fn finv() {
     check!(fisher_f_quantile, (0.0, 1.2, 1.3), 0.0, 0.0);
@@ -2476,6 +2484,7 @@ fn finv() {
     );
 }
 
+/// Checks gamma.
 #[test]
 fn gamma() {
     check!(gamma_cdf, (0.0, 1.0, 1.0), 0.0, 0.0);
@@ -2844,6 +2853,7 @@ fn gamma() {
     check!(gamma_survival, (10000.0, 17.0, 10.0), 0.0, 0.0);
 }
 
+/// Checks chisq.
 #[test]
 fn chisq() {
     check!(chi_squared_cdf, (0.0, 13.0), 0.0, 0.0);
@@ -2976,6 +2986,7 @@ fn chisq() {
     check!(chi_squared_survival, (10000.0, 13.0), 0.0, 0.0);
 }
 
+/// Checks beta.
 #[test]
 fn beta() {
     check!(beta_cdf, (0.0, 1.2, 1.3), 0.0, 0.0);
@@ -3072,6 +3083,7 @@ fn beta() {
     check!(beta_survival, (1.0, 1.2, 1.3), 0.0, TEST_TOL6);
 }
 
+/// Checks betainv.
 #[test]
 fn betainv() {
     check!(beta_quantile, (0.0, 1.2, 1.3), 0.0, 0.0);
@@ -3189,6 +3201,7 @@ fn betainv() {
     );
 }
 
+/// Checks gammainv.
 #[test]
 fn gammainv() {
     check!(gamma_quantile, (0.0, 1.0, 1.0), 0.0, 0.0);
@@ -3312,6 +3325,7 @@ fn gammainv() {
     check!(gamma_inverse_survival, (1.0, 1.0, 1.0), 0.0, 0.0);
 }
 
+/// Checks chisqinv.
 #[test]
 fn chisqinv() {
     check!(chi_squared_quantile, (0.0, 13.0), 0.0, 0.0);
@@ -3457,6 +3471,7 @@ fn chisqinv() {
     check!(chi_squared_inverse_survival, (1.0, 13.0), 0.0, 0.0);
 }
 
+/// Checks tdistinv.
 #[test]
 fn tdistinv() {
     check!(student_t_quantile, (0.5, 1.0), 0.0, TEST_TOL6);

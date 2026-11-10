@@ -9,6 +9,7 @@ pub(crate) const TEST_TOL6: f64 = 1048576.0 * f64::EPSILON;
 
 // Same relative-error convention as gsl_test_rel: absolute tolerance at zero.
 // Check infinity's sign as well as its presence.
+/// Asserts that `actual` matches `expected` within the given relative tolerance, using `context` in failures.
 pub(crate) fn assert_relative(actual: f64, expected: f64, tolerance: f64, context: &str) {
     let pass = if expected.is_infinite() {
         actual == expected

@@ -7,6 +7,7 @@ use crate::{
 };
 const LIMIT: usize = 16_384;
 
+/// Evaluates the incomplete-beta continued fraction for shapes `a, b` and argument `x`, with at most `limit` iterations.
 fn fraction(a: f64, b: f64, x: f64, limit: usize) -> Result<f64, Error> {
     // DLMF 8.17.22 continued fraction, two partial numerators per step.
     // Modified Lentz evaluation avoids unbounded numerator/denominator pairs.
@@ -34,6 +35,7 @@ fn fraction(a: f64, b: f64, x: f64, limit: usize) -> Result<f64, Error> {
     Err(Error::NonConvergence)
 }
 
+/// Returns the regularized beta lower and upper tails for `a, b, x`; `limit` bounds the series or fraction iterations.
 fn tails(a: f64, b: f64, x: f64, limit: usize) -> Result<(f64, f64), Error> {
     if !a.is_finite() || !b.is_finite() || a <= 0.0 || b <= 0.0 || !(0.0..=1.0).contains(&x) {
         return Err(Error::Domain);
@@ -136,6 +138,7 @@ pub fn regularized_complement(a: f64, b: f64, x: f64) -> Result<f64, Error> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    /// Checks exhaustion is an error.
     #[test]
     fn exhaustion_is_an_error() {
         assert_eq!(tails(30.0, 40.0, 0.4, 1), Err(Error::NonConvergence));

@@ -2,6 +2,7 @@ use crate::Error;
 
 // Bisection in log(x) handles quantiles spanning the entire f64 exponent
 // range, including subnormal lower tails. No probability complement is formed.
+/// Inverts the monotone probability callback `evaluate` at `p` over positive values up to `max`. Set `upper` for a decreasing survival function; returns an overflow or convergence error when necessary.
 pub(crate) fn positive_quantile(
     p: f64,
     upper: bool,

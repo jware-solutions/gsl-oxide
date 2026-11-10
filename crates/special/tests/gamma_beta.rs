@@ -7,6 +7,7 @@ use gsl_oxide_special::{
 mod support;
 use support::assert_close;
 
+/// Checks published gamma and log values.
 #[test]
 fn published_gamma_and_log_values() {
     // Numerical examples (not generated here):
@@ -55,6 +56,7 @@ fn published_gamma_and_log_values() {
     }
 }
 
+/// Checks gamma reflection poles and range.
 #[test]
 fn gamma_reflection_poles_and_range() {
     for x in [-10.25, -3.75, -0.25, 0.25, 2.75, 20.5] {
@@ -132,6 +134,7 @@ fn gamma_reflection_poles_and_range() {
     );
 }
 
+/// Checks beta independent anchors and extremes.
 #[test]
 fn beta_independent_anchors_and_extremes() {
     // Published beta examples, same gamma.html#beta-function URL above.
@@ -206,6 +209,7 @@ fn beta_independent_anchors_and_extremes() {
     }
 }
 
+/// Checks gamma and beta branch neighbors.
 #[test]
 fn gamma_and_beta_branch_neighbors() {
     for boundary in [0.25_f64, 0.5, 0.75, 1.25, 1.5, 1.75, 2.25, 16.0] {

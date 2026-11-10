@@ -1,5 +1,6 @@
 use crate::Error;
 
+/// Returns `value` when finite, or `NumericalRange` for overflow or NaN.
 pub(crate) fn finite(value: f64) -> Result<f64, Error> {
     if value.is_finite() {
         Ok(value)
@@ -8,6 +9,7 @@ pub(crate) fn finite(value: f64) -> Result<f64, Error> {
     }
 }
 
+/// Validates that an observed `value` is finite, returning `NonFiniteData` otherwise.
 pub(crate) fn observation(value: f64) -> Result<(), Error> {
     if value.is_finite() {
         Ok(())
@@ -25,6 +27,7 @@ pub(crate) struct Sum {
 }
 
 impl Sum {
+    /// Adds `value` to the compensated sum; reports unrepresentable intermediates without updating the sum.
     pub(crate) fn add(&mut self, value: f64) -> Result<(), Error> {
         let next = finite(self.value + value)?;
         let residual = if self.value.abs() >= value.abs() {
@@ -38,6 +41,7 @@ impl Sum {
         Ok(())
     }
 
+    /// Returns the compensated total, or a numerical-range error if it is not finite.
     pub(crate) fn total(self) -> Result<f64, Error> {
         if self.correction == 0.0 {
             finite(self.value)
@@ -51,6 +55,7 @@ impl Sum {
 // On overflow retry with a count-based power-of-two divisor: sum(abs(x))/divisor
 // then fits whenever each x fits. Scaling by the *data maximum* instead would
 // unnecessarily erase e.g. the 1e-300 term in [1e308, 1e-300, -1e308].
+/// Sums `values` and divides by `denominator`, using `count` to choose a fallback scale and clamping roundoff to `[lo, hi]`.
 pub(crate) fn average(
     values: impl Iterator<Item = f64> + Clone,
     count: usize,
@@ -83,6 +88,7 @@ pub(crate) fn average(
 }
 
 // Largest power of two <= magnitude, including subnormal powers.
+/// Returns the largest power of two no greater than nonnegative `magnitude`, or one when it is zero.
 pub(crate) fn power_scale(magnitude: f64) -> f64 {
     if magnitude == 0.0 {
         return 1.0;
@@ -96,6 +102,7 @@ pub(crate) fn power_scale(magnitude: f64) -> f64 {
     }
 }
 
+/// Returns the binary exponent of a positive power-of-two `scale`, including subnormal scales.
 fn exponent(scale: f64) -> i32 {
     let bits = scale.to_bits();
     let field = (bits >> 52) as i32;
@@ -108,6 +115,7 @@ fn exponent(scale: f64) -> i32 {
 
 // Combine binary exponents before scaling: neither scale product nor an
 // intermediate square must fit. Monotone scaling allows ordinary underflow.
+/// Multiplies `value` by power-of-two scales `a` and `b`, returning a numerical-range error on overflow.
 pub(crate) fn rescale(mut value: f64, a: f64, b: f64) -> Result<f64, Error> {
     let mut exp = exponent(a) + exponent(b);
     while exp > 512 {
@@ -121,6 +129,7 @@ pub(crate) fn rescale(mut value: f64, a: f64, b: f64) -> Result<f64, Error> {
     finite(value * 2.0_f64.powi(exp))
 }
 
+/// Returns `(value - mean) / scale`, rearranging the subtraction when it would overflow.
 pub(crate) fn difference(value: f64, mean: f64, scale: f64) -> f64 {
     let delta = value - mean;
     if delta.is_finite() {
@@ -130,6 +139,7 @@ pub(crate) fn difference(value: f64, mean: f64, scale: f64) -> f64 {
     }
 }
 
+/// Finds a power-of-two scale for deviations of `data` from `mean`, avoiding overflowing differences.
 pub(crate) fn deviation_scale(data: &[f64], mean: f64) -> f64 {
     let mut largest: f64 = 0.0;
     for &value in data {
@@ -150,6 +160,7 @@ pub(crate) struct Center {
 }
 
 impl Center {
+    /// Returns the centered, scaled deviation of `value`, corrected for the stored mean residual.
     pub(crate) fn at(self, value: f64) -> f64 {
         difference(value, self.mean, self.scale) - self.residual
     }

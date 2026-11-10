@@ -21,6 +21,7 @@ use crate::{finite_exp, incomplete_gamma::guard, Error, EULER};
 const LIMIT: usize = 512;
 const ASYMPTOTIC: f64 = 50.0;
 
+/// Validates `x` for exponential-integral evaluation; `pole` rejects zero when the selected function has a pole.
 fn validate(x: f64, pole: bool) -> Result<(), Error> {
     if x.is_nan() || (pole && x == 0.0) {
         Err(Error::Domain)
@@ -31,6 +32,7 @@ fn validate(x: f64, pole: bool) -> Result<(), Error> {
     }
 }
 
+/// Adds `term` to `sum` using the mutable compensation `correction`.
 fn add(sum: &mut f64, correction: &mut f64, term: f64) {
     let adjusted = term - *correction;
     let next = *sum + adjusted;
@@ -40,6 +42,7 @@ fn add(sum: &mut f64, correction: &mut f64, term: f64) {
 
 // DLMF 6.6.1/2. The alternating series is only used for |x|<=1;
 // the positive series for Ei has no large-term cancellation.
+/// Evaluates the Ei power series at `x` using at most `limit` terms; returns a convergence error on exhaustion.
 fn series(x: f64, limit: usize) -> Result<f64, Error> {
     let mut power = 1.0;
     let mut sum = 0.0;
@@ -57,6 +60,7 @@ fn series(x: f64, limit: usize) -> Result<f64, Error> {
 
 // Integrate the Taylor series of exp(t)/t about Ei's zero (DLMF 6.13.1).
 // The split root retains distances smaller than an ulp of the root.
+/// Evaluates Ei near its positive zero at `x`, using at most `limit` Taylor terms.
 fn near_root(x: f64, limit: usize) -> Result<f64, Error> {
     const ROOT_HI: f64 = 0.372_507_410_781_366_6;
     const ROOT_LO: f64 = 1.314_018_341_438_602_9e-17;
@@ -82,6 +86,7 @@ fn near_root(x: f64, limit: usize) -> Result<f64, Error> {
 // Scaled asymptotics: DLMF 6.12.1/2 and 8.20.1. Starting at 50
 // permits termination at f64 precision well before the least term.
 // sign=-1 gives E_n(x), sign=+1 gives Ei(x) (n=1) or -E2(-x) (n=2).
+/// Evaluates a scaled large-`x` expansion of order `n`; `sign` selects its family and `limit` bounds the terms.
 fn asymptotic(x: f64, n: u32, sign: f64, limit: usize) -> Result<f64, Error> {
     let mut term = 1.0;
     let mut sum = 1.0;
@@ -102,6 +107,7 @@ fn asymptotic(x: f64, n: u32, sign: f64, limit: usize) -> Result<f64, Error> {
 
 // Contracted continued fraction, DLMF 8.19.17 / 8.9.2, modified Lentz.
 // Evaluate E2 directly, avoiding exp(-x)-x*E1(x) cancellation at large x.
+/// Returns the scaled positive-argument E_n continued fraction for `n, x`, or a convergence error after `limit` steps.
 fn fraction(n: u32, x: f64, limit: usize) -> Result<f64, Error> {
     let mut b = x + f64::from(n);
     let mut c = 1e300;
@@ -124,6 +130,7 @@ fn fraction(n: u32, x: f64, limit: usize) -> Result<f64, Error> {
     Err(Error::NonConvergence)
 }
 
+/// Returns `exp(x) * E_n(x)` for positive `x` and supported order `n`.
 fn positive_en_scaled(n: u32, x: f64) -> Result<f64, Error> {
     if x <= 1.0 {
         let e1 = -series(-x, LIMIT)?;
@@ -140,6 +147,7 @@ fn positive_en_scaled(n: u32, x: f64) -> Result<f64, Error> {
     }
 }
 
+/// Returns `exp(-x) * Ei(x)` for positive `x`, or a numerical convergence error.
 fn positive_ei_scaled(x: f64) -> Result<f64, Error> {
     if x >= ASYMPTOTIC {
         asymptotic(x, 1, 1.0, LIMIT)
@@ -155,6 +163,7 @@ fn positive_ei_scaled(x: f64) -> Result<f64, Error> {
 
 // Split the exponential so exp(exponent) cannot overflow or prematurely
 // underflow when its product with the scaled result is representable.
+/// Multiplies `value` by `exp(exponent)` while limiting intermediate overflow; returns an error if the result overflows.
 fn unscale(value: f64, exponent: f64) -> Result<f64, Error> {
     if exponent.abs() <= 700.0 {
         return Ok(value * exponent.exp());
@@ -254,6 +263,7 @@ pub fn ei_scaled(x: f64) -> Result<f64, Error> {
 mod tests {
     use super::*;
 
+    /// Checks bounded iteration failures.
     #[test]
     fn bounded_iteration_failures() {
         assert_eq!(series(2.0, 1), Err(Error::NonConvergence));

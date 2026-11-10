@@ -1,5 +1,6 @@
 use gsl_oxide_integration::Error;
 
+/// Asserts that `actual` and `expected` agree within the supplied absolute and relative tolerances.
 pub(crate) fn assert_close(actual: f64, expected: f64, abs: f64, rel: f64) {
     assert!(abs.is_finite() && abs >= 0.0 && rel.is_finite() && rel >= 0.0);
     assert!(actual.is_finite() && expected.is_finite());
@@ -11,6 +12,7 @@ pub(crate) fn assert_close(actual: f64, expected: f64, abs: f64, rel: f64) {
     );
 }
 
+/// Checks an integration `result` against `expected` with absolute and relative tolerances, returning its value and error.
 pub(crate) fn check(
     result: Result<(f64, f64), Error>,
     expected: f64,

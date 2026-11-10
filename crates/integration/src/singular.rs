@@ -118,6 +118,12 @@ pub fn integrate_singular<F: FnMut(f64) -> f64>(
     Err(Error::Roundoff)
 }
 
+/// Accumulates one side of a transformed endpoint-singular integral.
+///
+/// Uses the callback `budget` on interval `[a, b]`, with `half` its half-width,
+/// mesh spacing `h`, and `right` selecting the endpoint. Stops against `goal`,
+/// updating the sum, absolute sum, and uncertainty accumulators. Returns an
+/// estimate of the remaining tail, or an error if sampling or convergence fails.
 #[allow(clippy::too_many_arguments)]
 fn side<F: FnMut(f64) -> f64>(
     budget: &mut Budget<F>,

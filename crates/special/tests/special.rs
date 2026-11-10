@@ -5,6 +5,7 @@ use gsl_oxide_special::error_functions::erf;
 mod support;
 use support::assert_close;
 
+/// Checks comparison accepts absolute relative and exact bounds.
 #[test]
 fn comparison_accepts_absolute_relative_and_exact_bounds() {
     // Binary fractions make the accepted boundaries exact in these checks.
@@ -18,6 +19,7 @@ fn comparison_accepts_absolute_relative_and_exact_bounds() {
 
 #[test]
 #[should_panic(expected = "allowed bound")]
+/// Checks comparison rejects just outside absolute bound.
 fn comparison_rejects_just_outside_absolute_bound() {
     let actual = f64::from_bits(1.25_f64.to_bits() + 1);
     assert_close(actual, 1.0, 0.25, 0.125, "outside absolute bound");
@@ -25,11 +27,13 @@ fn comparison_rejects_just_outside_absolute_bound() {
 
 #[test]
 #[should_panic(expected = "allowed bound")]
+/// Checks comparison rejects just outside relative bound.
 fn comparison_rejects_just_outside_relative_bound() {
     let actual = f64::from_bits(9.0_f64.to_bits() + 1);
     assert_close(actual, 8.0, 0.25, 0.125, "outside relative bound");
 }
 
+/// Checks comparison rejects invalid tolerances.
 #[test]
 fn comparison_rejects_invalid_tolerances() {
     for invalid in [-f64::EPSILON, f64::NAN, f64::INFINITY, f64::NEG_INFINITY] {
@@ -45,6 +49,7 @@ fn comparison_rejects_invalid_tolerances() {
     }
 }
 
+/// Checks comparison rejects non finite values.
 #[test]
 fn comparison_rejects_non_finite_values() {
     for non_finite in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY] {
@@ -64,6 +69,7 @@ fn comparison_rejects_non_finite_values() {
     }
 }
 
+/// Checks reference values.
 #[test]
 fn reference_values() {
     // Retain Phase 1's rounded literals, documented there as Taylor-series
@@ -106,6 +112,7 @@ fn reference_values() {
     }
 }
 
+/// Checks non finite inputs.
 #[test]
 fn non_finite_inputs() {
     assert!(erf(f64::NAN).is_nan());
@@ -114,12 +121,14 @@ fn non_finite_inputs() {
     assert_eq!(erf(f64::NEG_INFINITY), -1.0);
 }
 
+/// Checks preserves signed zero.
 #[test]
 fn preserves_signed_zero() {
     assert_eq!(erf(0.0).to_bits(), 0.0_f64.to_bits());
     assert_eq!(erf(-0.0).to_bits(), (-0.0_f64).to_bits());
 }
 
+/// Checks odd symmetry.
 #[test]
 fn odd_symmetry() {
     // A relationship check, supplementary to the independent reference values.
@@ -148,6 +157,7 @@ fn odd_symmetry() {
     }
 }
 
+/// Checks tiny inputs follow the derivative at zero.
 #[test]
 fn tiny_inputs_follow_the_derivative_at_zero() {
     // DLMF 7.6.1: erf(x) = 2*x/sqrt(pi) + O(x^3). Here |x| <= 1e-10,
@@ -166,6 +176,7 @@ fn tiny_inputs_follow_the_derivative_at_zero() {
     }
 }
 
+/// Checks subnormals and normal transition.
 #[test]
 fn subnormals_and_normal_transition() {
     // The cubic correction in DLMF 7.6.1 is smaller than a subnormal step here.
@@ -200,6 +211,7 @@ fn subnormals_and_normal_transition() {
     }
 }
 
+/// Checks saturation boundary.
 #[test]
 fn saturation_boundary() {
     // The Gaussian tail bound exp(-x^2)/(x*sqrt(pi)) is < half an ulp below 1
@@ -225,6 +237,7 @@ fn saturation_boundary() {
     }
 }
 
+/// Checks very large finite inputs.
 #[test]
 fn very_large_finite_inputs() {
     // Exact unit limits also require finite, bounded, correctly signed results.
@@ -235,6 +248,7 @@ fn very_large_finite_inputs() {
     }
 }
 
+/// Checks finite outputs have mathematical range and sign.
 #[test]
 fn finite_outputs_have_mathematical_range_and_sign() {
     for magnitude in [

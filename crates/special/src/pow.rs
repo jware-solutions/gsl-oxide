@@ -73,12 +73,14 @@ pub trait Pow {
 }
 
 impl Pow for f64 {
+    /// Returns the base raised to signed integer exponent `n` using reciprocal-first exponentiation for negative exponents.
     #[inline]
     fn pow_int(&self, n: i32) -> Self {
         let base = if n < 0 { 1.0 / *self } else { *self };
         base.pow_uint(n.unsigned_abs())
     }
 
+    /// Returns the base raised to unsigned integer exponent `n` by repeated squaring.
     #[inline]
     fn pow_uint(&self, mut n: u32) -> Self {
         let mut base = *self;
@@ -95,40 +97,47 @@ impl Pow for f64 {
         }
     }
 
+    /// Returns the base squared using GSL's multiplication order.
     #[inline]
     fn pow_2(&self) -> Self {
         *self * *self
     }
 
+    /// Returns the base cubed using GSL's multiplication order.
     #[inline]
     fn pow_3(&self) -> Self {
         *self * *self * *self
     }
 
+    /// Returns the base raised to the 4th power using GSL’s multiplication order.
     #[inline]
     fn pow_4(&self) -> Self {
         let x2 = *self * *self;
         x2 * x2
     }
 
+    /// Returns the base raised to the 5th power using GSL’s multiplication order.
     #[inline]
     fn pow_5(&self) -> Self {
         let x2 = *self * *self;
         x2 * x2 * *self
     }
 
+    /// Returns the base raised to the 6th power using GSL’s multiplication order.
     #[inline]
     fn pow_6(&self) -> Self {
         let x2 = *self * *self;
         x2 * x2 * x2
     }
 
+    /// Returns the base raised to the 7th power using GSL’s multiplication order.
     #[inline]
     fn pow_7(&self) -> Self {
         let x3 = *self * *self * *self;
         x3 * x3 * *self
     }
 
+    /// Returns the base raised to the 8th power using GSL’s multiplication order.
     #[inline]
     fn pow_8(&self) -> Self {
         let x2 = *self * *self;
@@ -136,6 +145,7 @@ impl Pow for f64 {
         x4 * x4
     }
 
+    /// Returns the base raised to the 9th power using GSL’s multiplication order.
     #[inline]
     fn pow_9(&self) -> Self {
         let x3 = *self * *self * *self;

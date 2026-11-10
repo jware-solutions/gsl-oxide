@@ -6,6 +6,7 @@ use std::f64::consts::PI;
 mod support;
 use support::check;
 
+/// Checks exponentials gaussians and heavy tails.
 #[test]
 fn exponentials_gaussians_and_heavy_tails() {
     check(
@@ -46,6 +47,7 @@ fn exponentials_gaussians_and_heavy_tails() {
     );
 }
 
+/// Checks shifted boundaries and independently convergent asymmetric tails.
 #[test]
 fn shifted_boundaries_and_independently_convergent_asymmetric_tails() {
     check(
@@ -115,6 +117,7 @@ fn shifted_boundaries_and_independently_convergent_asymmetric_tails() {
     );
 }
 
+/// Checks opposite divergent tails are not a principal value.
 #[test]
 fn opposite_divergent_tails_are_not_a_principal_value() {
     for f in [f64::signum as fn(f64) -> f64, |x| x / (1.0 + x * x)] {

@@ -49,6 +49,7 @@ pub use normal::{
 };
 pub use shaped::*;
 
+/// Checks that parameter `x` is finite and strictly positive, returning a domain error otherwise.
 fn positive(x: f64) -> Result<(), Error> {
     if x.is_finite() && x > 0.0 {
         Ok(())
@@ -57,6 +58,7 @@ fn positive(x: f64) -> Result<(), Error> {
     }
 }
 
+/// Checks that probability `p` lies in `[0,1]`, rejecting NaN and out-of-range values.
 fn probability(p: f64) -> Result<(), Error> {
     if (0.0..=1.0).contains(&p) {
         Ok(())
@@ -65,6 +67,7 @@ fn probability(p: f64) -> Result<(), Error> {
     }
 }
 
+/// Checks observation `x` for NaN; finite values and infinities are accepted.
 fn observation(x: f64) -> Result<(), Error> {
     if x.is_nan() {
         Err(Error::Domain)
@@ -73,6 +76,7 @@ fn observation(x: f64) -> Result<(), Error> {
     }
 }
 
+/// Returns quantile `x`, allowing infinite endpoints for `p` equal to zero or one and reporting interior overflow.
 fn finite_quantile(x: f64, p: f64) -> Result<f64, Error> {
     if x.is_nan() {
         Err(Error::NonConvergence)

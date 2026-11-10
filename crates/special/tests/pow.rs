@@ -16,6 +16,7 @@ const SMALL_POWERS: [fn(&f64) -> f64; 8] = [
     f64::pow_9,
 ];
 
+/// Checks downstream expression uses public trait.
 #[test]
 fn downstream_expression_uses_public_trait() {
     const N_FAC2_DBLE: [f64; 7] = [1.0, 1.0, 2.0, 3.0, 8.0, 15.0, 48.0];
@@ -34,6 +35,7 @@ fn downstream_expression_uses_public_trait() {
     assert_eq!(erf(0.0), 0.0);
 }
 
+/// Checks small powers have exact binary anchors.
 #[test]
 fn small_powers_have_exact_binary_anchors() {
     let expected = [
@@ -51,6 +53,7 @@ fn small_powers_have_exact_binary_anchors() {
     }
 }
 
+/// Checks integer powers match gsl test cases.
 #[test]
 fn integer_powers_match_gsl_test_cases() {
     // GSL 2.8 sys/test.c compares these cases with libm's real-exponent pow.
@@ -93,6 +96,7 @@ fn integer_powers_match_gsl_test_cases() {
     }
 }
 
+/// Checks full integer ranges preserve exponent and parity.
 #[test]
 fn full_integer_ranges_preserve_exponent_and_parity() {
     for n in [i32::MIN, i32::MIN + 1, -1, 0, 1, i32::MAX] {
@@ -109,6 +113,7 @@ fn full_integer_ranges_preserve_exponent_and_parity() {
     assert_eq!(0.5_f64.pow_uint(u32::MAX), 0.0);
 }
 
+/// Checks exponent zero and one handle all bases.
 #[test]
 fn exponent_zero_and_one_handle_all_bases() {
     for base in [
@@ -132,6 +137,7 @@ fn exponent_zero_and_one_handle_all_bases() {
     }
 }
 
+/// Checks zeros infinities and nan follow ieee arithmetic.
 #[test]
 fn zeros_infinities_and_nan_follow_ieee_arithmetic() {
     for n in [2, 3, 8, 9] {
@@ -170,6 +176,7 @@ fn zeros_infinities_and_nan_follow_ieee_arithmetic() {
     }
 }
 
+/// Checks overflow underflow and reciprocal first keep gsl behavior.
 #[test]
 fn overflow_underflow_and_reciprocal_first_keep_gsl_behavior() {
     assert_eq!(2.0_f64.pow_uint(1023), 2.0_f64.powi(1023));

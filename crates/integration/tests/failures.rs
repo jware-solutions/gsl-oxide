@@ -6,6 +6,7 @@ use gsl_oxide_integration::{
 
 type Runner = fn(&mut dyn FnMut(f64) -> f64, f64, f64, usize) -> Result<(f64, f64), Error>;
 
+/// Returns adapters for the six integration methods used by common failure tests.
 fn runners() -> [Runner; 6] {
     [
         |f, a, r, n| integrate(f, 0.0, 1.0, a, r, n),
@@ -17,6 +18,7 @@ fn runners() -> [Runner; 6] {
     ]
 }
 
+/// Checks every method checks tolerances before callbacks.
 #[test]
 fn every_method_checks_tolerances_before_callbacks() {
     for run in runners() {
@@ -43,6 +45,7 @@ fn every_method_checks_tolerances_before_callbacks() {
     }
 }
 
+/// Checks finite bounds and breakpoint validation is complete.
 #[test]
 fn finite_bounds_and_breakpoint_validation_is_complete() {
     for nonfinite in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY] {
@@ -97,6 +100,7 @@ fn finite_bounds_and_breakpoint_validation_is_complete() {
     );
 }
 
+/// Checks zero length and empty breakpoint contracts.
 #[test]
 fn zero_length_and_empty_breakpoint_contracts() {
     for x in [-f64::MAX, -1.0, -0.0, 0.0, 1.0, f64::MAX] {
@@ -124,6 +128,7 @@ fn zero_length_and_empty_breakpoint_contracts() {
     );
 }
 
+/// Checks exact budget boundaries for every public method.
 #[test]
 fn exact_budget_boundaries_for_every_public_method() {
     for (index, run) in runners().into_iter().enumerate() {
@@ -214,6 +219,7 @@ fn exact_budget_boundaries_for_every_public_method() {
     assert_eq!(calls, 29);
 }
 
+/// Checks nan and both infinities are never discarded.
 #[test]
 fn nan_and_both_infinities_are_never_discarded() {
     for run in runners() {
@@ -240,6 +246,7 @@ fn nan_and_both_infinities_are_never_discarded() {
     }
 }
 
+/// Checks overflow roundoff subdivision and exhaustion.
 #[test]
 fn overflow_roundoff_subdivision_and_exhaustion() {
     // Regression: every weighted sample may underflow even though the integral

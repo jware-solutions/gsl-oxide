@@ -42,10 +42,12 @@ macro_rules! distribution {
     };
 }
 
+/// Returns lower and upper probabilities from `log_survival`, evaluating the lower tail with `expm1`.
 fn exponential_tails(log_survival: f64) -> (f64, f64) {
     (-log_survival.exp_m1(), log_survival.exp())
 }
 
+/// Returns the log lower-tail probability corresponding to `p`; `upper` identifies a supplied survival probability.
 fn lower_log(p: f64, upper: bool) -> f64 {
     if upper {
         (-p).ln_1p()
@@ -54,6 +56,7 @@ fn lower_log(p: f64, upper: bool) -> f64 {
     }
 }
 
+/// Returns the log survival probability corresponding to `p`; `upper` identifies a supplied survival probability.
 fn upper_log(p: f64, upper: bool) -> f64 {
     if upper {
         p.ln()
@@ -62,6 +65,7 @@ fn upper_log(p: f64, upper: bool) -> f64 {
     }
 }
 
+/// Returns `scale * base^exponent`, switching to logarithms when the power overflows or underflows.
 fn scaled_power(scale: f64, base: f64, exponent: f64) -> f64 {
     let power = base.powf(exponent);
     if power == 0.0 || power.is_infinite() {

@@ -16,10 +16,12 @@ const STIRLING: [f64; 8] = [
     -3617.0 / 122400.0,
 ];
 
+/// Returns the Stirling log-gamma correction for positive `x`.
 pub(crate) fn correction(x: f64) -> f64 {
     correction_from_inverse(1.0 / x)
 }
 
+/// Returns the Stirling correction from the reciprocal argument `inv`.
 pub(crate) fn correction_from_inverse(inv: f64) -> f64 {
     let square = inv * inv;
     STIRLING.iter().rev().fold(0.0, |s, c| s * square + c) * inv
@@ -28,6 +30,7 @@ pub(crate) fn correction_from_inverse(inv: f64) -> f64 {
 // Euler--Maclaurin evaluation of zeta(k), k>=2 (DLMF 25.2.9), only
 // for the local log-gamma Taylor series. Bernoulli/factorial coefficients
 // are obtained from the same rational Bernoulli numbers above.
+/// Approximates the Riemann zeta value at integer `k >= 2` for the local gamma series.
 fn zeta(k: i32) -> f64 {
     let s = f64::from(k);
     let mut sum = (1..16).map(|n| f64::from(n).powi(-k)).sum::<f64>();
@@ -51,6 +54,7 @@ fn zeta(k: i32) -> f64 {
 // log Gamma(b+a)-log Gamma(b), b>=16, 0<a<=16.
 // Algebraic difference of DLMF 5.11.1, preserving O(a) terms even when
 // b+a rounds to b. Used by both complete and incomplete beta.
+/// Returns `ln Gamma(b+a) - ln Gamma(b)` for `b >= 16` and `0 < a <= 16`.
 pub(crate) fn log_ratio(b: f64, a: f64) -> f64 {
     let r = a / b;
     let l = r.ln_1p();
@@ -64,6 +68,7 @@ pub(crate) fn log_ratio(b: f64, a: f64) -> f64 {
     a * b.ln() + a * ((a - 0.5) / b) + (b + a - 0.5) * crate::log1pmx(r) + difference
 }
 
+/// Returns `ln Gamma(1+z)` using its Taylor series for `|z| <= 1/2`.
 pub(crate) fn ln_gamma1p(z: f64) -> f64 {
     // DLMF 5.7.3: log Gamma(1+z)=-Euler*z+sum (-z)^k*zeta(k)/k.
     // |z|<=1/2; the remainder after 64 terms is < 2e-21.
@@ -76,6 +81,7 @@ pub(crate) fn ln_gamma1p(z: f64) -> f64 {
     sum
 }
 
+/// Returns `ln Gamma(x)` for positive `x`, using recurrence and a Stirling expansion.
 pub(crate) fn positive_log(mut x: f64) -> f64 {
     if (0.5..=1.5).contains(&x) {
         return ln_gamma1p(x - 1.0);

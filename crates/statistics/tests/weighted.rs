@@ -12,6 +12,7 @@ const QUERIES: [Query; 3] = [
     weighted_reliability_variance,
 ];
 
+/// Checks independent weighted anchors.
 #[test]
 fn independent_weighted_anchors() {
     // W=4, W2=10, mean=13/4, M2_w=27/4. Reliability denominator=3/2,
@@ -40,6 +41,7 @@ fn independent_weighted_anchors() {
     );
 }
 
+/// Checks degenerate weights and removal before value validation.
 #[test]
 fn degenerate_weights_and_removal_before_value_validation() {
     for query in QUERIES {
@@ -73,6 +75,7 @@ fn degenerate_weights_and_removal_before_value_validation() {
     }
 }
 
+/// Checks equal weights and common rescaling.
 #[test]
 fn equal_weights_and_common_rescaling() {
     let b = 2.0_f64.powi(40);
@@ -105,6 +108,7 @@ fn equal_weights_and_common_rescaling() {
     }
 }
 
+/// Checks strong imbalance and weight range.
 #[test]
 fn strong_imbalance_and_weight_range() {
     // For two observations a,b and positive weights u,v, the reliability
@@ -148,6 +152,7 @@ fn strong_imbalance_and_weight_range() {
     }
 }
 
+/// Checks weighted value range and identities.
 #[test]
 fn weighted_value_range_and_identities() {
     close(

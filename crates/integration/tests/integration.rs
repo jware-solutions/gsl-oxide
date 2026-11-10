@@ -4,6 +4,7 @@ use std::f64::consts::PI;
 mod support;
 use support::{assert_close, check};
 
+/// Checks elementary integrals and estimates.
 #[test]
 fn elementary_integrals_and_estimates() {
     // Integral x^n on [0,1] = 1/(n+1); sin and exp from their antiderivatives.
@@ -41,6 +42,7 @@ fn elementary_integrals_and_estimates() {
     );
 }
 
+/// Checks transformations reversal and additivity.
 #[test]
 fn transformations_reversal_and_additivity() {
     let (area, error) = check(
@@ -71,6 +73,7 @@ fn transformations_reversal_and_additivity() {
     }
 }
 
+/// Checks cancellation and global breakpoint accuracy.
 #[test]
 fn cancellation_and_global_breakpoint_accuracy() {
     check(
@@ -127,6 +130,7 @@ fn cancellation_and_global_breakpoint_accuracy() {
     );
 }
 
+/// Checks discontinuity and unequal segment difficulty.
 #[test]
 fn discontinuity_and_unequal_segment_difficulty() {
     for (a, b, sign) in [(0.0, 1.0, 1.0), (1.0, 0.0, -1.0)] {
@@ -164,6 +168,7 @@ fn discontinuity_and_unequal_segment_difficulty() {
     );
 }
 
+/// Checks peaks with analytic arctangent answers.
 #[test]
 fn peaks_with_analytic_arctangent_answers() {
     for (width, points) in [(0.03, &[][..]), (1e-6, &[0.29999, 0.3, 0.30001][..])] {

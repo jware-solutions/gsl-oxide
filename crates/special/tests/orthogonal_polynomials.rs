@@ -3,6 +3,7 @@ use gsl_oxide_special::{laguerre::generalized_polynomial, legendre, Error};
 mod support;
 use support::assert_close;
 
+/// Checks legendre low orders endpoints and central values.
 #[test]
 fn legendre_low_orders_endpoints_and_central_values() {
     // DLMF 18.5.16, exact polynomial coefficients and special values.
@@ -70,6 +71,7 @@ fn legendre_low_orders_endpoints_and_central_values() {
 // DLMF 18.5.7 with alpha=beta=0. This is not the degree recurrence.
 // Used only where the absolute sum of terms is small, so cancellation
 // in this test expression cannot swamp the chosen absolute tolerances.
+/// Computes the independent finite-sum Legendre polynomial of degree `n` at `x` for test comparisons.
 fn legendre_explicit(n: u32, x: f64) -> f64 {
     let z = (1.0 - x) / 2.0;
     let mut term = 1.0;
@@ -81,6 +83,7 @@ fn legendre_explicit(n: u32, x: f64) -> f64 {
     sum
 }
 
+/// Checks legendre high degrees and difficult regions.
 #[test]
 fn legendre_high_degrees_and_difficult_regions() {
     for n in [100, 999, 1000] {
@@ -155,6 +158,7 @@ fn legendre_high_degrees_and_difficult_regions() {
     }
 }
 
+/// Checks legendre domains and supplemental identities.
 #[test]
 fn legendre_domains_and_supplemental_identities() {
     for n in [0, 1, 1000] {
@@ -205,6 +209,7 @@ fn legendre_domains_and_supplemental_identities() {
     }
 }
 
+/// Checks laguerre independent values and low degree formulas.
 #[test]
 fn laguerre_independent_values_and_low_degree_formulas() {
     // Published examples, no external oracle execution:
@@ -269,6 +274,7 @@ fn laguerre_independent_values_and_low_degree_formulas() {
 // recurrence. Positive x is restricted to |n*x|<=2, where cancellation
 // is mild; negative x has entirely positive terms. These are independently
 // justified exact finite expressions (with ordinary f64 rounding).
+/// Computes a finite-sum generalized Laguerre polynomial of degree `n`, parameter `alpha`, and argument `x` for test comparisons.
 fn laguerre_explicit(n: u32, alpha: f64, x: f64) -> f64 {
     let mut sum = 0.0;
     let mut power_over_factorial = 1.0;
@@ -283,6 +289,7 @@ fn laguerre_explicit(n: u32, alpha: f64, x: f64) -> f64 {
     sum
 }
 
+/// Checks laguerre high degrees near roots and alpha boundary.
 #[test]
 fn laguerre_high_degrees_near_roots_and_alpha_boundary() {
     let near_minus_one = f64::from_bits((-1.0_f64).to_bits() - 1);
@@ -364,6 +371,7 @@ fn laguerre_high_degrees_near_roots_and_alpha_boundary() {
     }
 }
 
+/// Checks laguerre domains limits overflow and recurrence.
 #[test]
 fn laguerre_domains_limits_overflow_and_recurrence() {
     for n in [0, 1, 1000] {

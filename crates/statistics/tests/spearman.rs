@@ -25,6 +25,7 @@ mod support;
 use gsl_oxide_statistics::{spearman_correlation, Error};
 use support::{close, positive_zero};
 
+/// Checks gsl floating point regression.
 #[test]
 fn gsl_floating_point_regression() {
     let x = [
@@ -43,6 +44,7 @@ fn gsl_floating_point_regression() {
     );
 }
 
+/// Checks gsl integer regression with ties.
 #[test]
 fn gsl_integer_regression_with_ties() {
     let x = [
@@ -61,6 +63,7 @@ fn gsl_integer_regression_with_ties() {
     );
 }
 
+/// Checks average ranks for ties.
 #[test]
 fn average_ranks_for_ties() {
     // Hand-computed centered rank sums. The first case has M2_x=1.5,
@@ -77,6 +80,7 @@ fn average_ranks_for_ties() {
     positive_zero(spearman_correlation(&[1., 1., 2., 2.], &[1., 2., 1., 2.]).unwrap());
 }
 
+/// Checks monotonic association and extreme values.
 #[test]
 fn monotonic_association_and_extreme_values() {
     let x = [4.0_f64, -2., 8., 0., 1.];
@@ -116,6 +120,7 @@ fn monotonic_association_and_extreme_values() {
     );
 }
 
+/// Checks pairing order symmetry and input preservation.
 #[test]
 fn pairing_order_symmetry_and_input_preservation() {
     let x = [8., -0., 3., 8., 5., 0., 1.];
@@ -145,10 +150,12 @@ fn pairing_order_symmetry_and_input_preservation() {
     assert_eq!(y.map(f64::to_bits), before_y);
 }
 
+/// Checks untied permutations match rank difference formula.
 #[test]
 fn untied_permutations_match_rank_difference_formula() {
     // With no ties rho = 1 - 6*sum((rank_x-rank_y)^2)/(n*(n^2-1)).
     // Check every permutation of five ranks against this independent identity.
+    /// Recursively checks Spearman correlation for permutations of `y` from index `start`.
     fn check(y: &mut [f64; 5], start: usize) {
         if start == y.len() {
             let x = [1., 2., 3., 4., 5.];
@@ -167,6 +174,7 @@ fn untied_permutations_match_rank_difference_formula() {
     check(&mut [1., 2., 3., 4., 5.], 0);
 }
 
+/// Checks invalid input contracts.
 #[test]
 fn invalid_input_contracts() {
     assert_eq!(spearman_correlation(&[], &[1.]), Err(Error::LengthMismatch));

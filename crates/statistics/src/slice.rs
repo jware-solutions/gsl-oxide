@@ -25,6 +25,7 @@ pub fn mean(data: &[f64]) -> Result<f64, Error> {
     average(data.iter().copied(), data.len(), data.len() as f64, lo, hi)
 }
 
+/// Computes the mean, deviation scale, and residual for finite observations in `data`.
 fn center(data: &[f64]) -> Result<Center, Error> {
     let mean = mean(data)?;
     let scale = deviation_scale(data, mean);
@@ -41,6 +42,7 @@ fn center(data: &[f64]) -> Result<Center, Error> {
 
 // Recenter in normalized coordinates before squaring. This is a corrected
 // centered two-pass calculation without subtracting nearly equal raw moments.
+/// Computes variance of `data`; `sample` selects the `n-1` denominator instead of `n`.
 fn variance(data: &[f64], sample: bool) -> Result<f64, Error> {
     let c = center(data)?;
     if sample && data.len() < 2 {
@@ -95,6 +97,7 @@ pub fn sample_standard_deviation(data: &[f64]) -> Result<f64, Error> {
     Ok(sample_variance(data)?.sqrt())
 }
 
+/// Validates paired slices `x, y` and returns their centering information or an input error.
 fn paired(x: &[f64], y: &[f64]) -> Result<(Center, Center), Error> {
     if x.len() != y.len() {
         return Err(Error::LengthMismatch);

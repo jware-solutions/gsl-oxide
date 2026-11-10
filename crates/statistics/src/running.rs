@@ -199,6 +199,7 @@ impl RunningStatistics {
 mod tests {
     use super::*;
 
+    /// Returns the count and internal floating-point bit patterns of accumulator `s` for atomicity checks.
     fn snapshot(s: &RunningStatistics) -> (usize, [u64; 4]) {
         (
             s.count,
@@ -211,6 +212,7 @@ mod tests {
         )
     }
 
+    /// Checks count overflow is atomic.
     #[test]
     fn count_overflow_is_atomic() {
         let mut state = RunningStatistics {
@@ -236,6 +238,7 @@ mod tests {
         assert_eq!(snapshot(&state), before);
     }
 
+    /// Checks internal moment overflow is atomic.
     #[test]
     fn internal_moment_overflow_is_atomic() {
         let mut state = RunningStatistics {
