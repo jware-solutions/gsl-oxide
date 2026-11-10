@@ -259,6 +259,103 @@ Multivariate matrices are flattened row-major slices. Normal sampling and densit
 
 `choose` preserves source order and samples without replacement; `sample_with_replacement` permits repeated items. Both return cloned items. `shuffle` mutates a borrowed slice. `DiscreteDistribution::new` preprocesses weights into a Walker alias table, with automatic cleanup. Its `pdf(category)` method returns the normalized probability for a zero-based category index, or zero outside the table.
 
+## Cumulative distributions and quantiles
+
+Rust names in this section are relative to `gsl_oxide_cdf`. All 86 public functions in GSL 2.8's `gsl_cdf.h` have counterparts. The `_cdf` suffix replaces GSL's `_P` (`Pr(X <= x)`); `_survival` replaces `_Q` (`Pr(X > x)`). `_quantile` replaces `_Pinv`, and `_inverse_survival` replaces `_Qinv`. Survival functions and their inverses retain small upper tails without subtracting them from one. GSL supplies no exponential-power inverses or discrete quantiles.
+
+Every operation returns `Result<f64, Error>`; `Error` is re-exported from `gsl_oxide_special`. Parameters follow GSL's order, with finite positive scales, shapes, and degrees of freedom. Normal distributions are centered at zero; `standard_normal` also has unit variance. Beta and gamma shapes are supported through `1e8`; related distribution limits follow their beta/gamma transformations. Large balanced beta shapes can lose about `1e-7` absolute probability. Invalid domains, unsupported ranges, overflow of finite quantiles, and iteration failures return errors. Infinite observations and inverse support endpoints are supported; probabilities can underflow to zero. See crate documentation for numerical limits.
+
+Discrete counts are `u32`. The geometric distribution counts trials through the first success; negative binomial and Pascal count failures before the requested successes. Binomial and geometric success probabilities include zero and one; negative binomial and Pascal require positive success counts. Poisson permits mean zero as a point mass at zero. Hypergeometric CDFs require draws not to exceed the population, as in GSL's CDF API; population addition is widened to avoid integer overflow.
+
+| GSL function | Rust function |
+| --- | --- |
+| `gsl_cdf_ugaussian_P` | `standard_normal_cdf` |
+| `gsl_cdf_ugaussian_Q` | `standard_normal_survival` |
+| `gsl_cdf_ugaussian_Pinv` | `standard_normal_quantile` |
+| `gsl_cdf_ugaussian_Qinv` | `standard_normal_inverse_survival` |
+| `gsl_cdf_gaussian_P` | `normal_cdf` |
+| `gsl_cdf_gaussian_Q` | `normal_survival` |
+| `gsl_cdf_gaussian_Pinv` | `normal_quantile` |
+| `gsl_cdf_gaussian_Qinv` | `normal_inverse_survival` |
+| `gsl_cdf_gamma_P` | `gamma_cdf` |
+| `gsl_cdf_gamma_Q` | `gamma_survival` |
+| `gsl_cdf_gamma_Pinv` | `gamma_quantile` |
+| `gsl_cdf_gamma_Qinv` | `gamma_inverse_survival` |
+| `gsl_cdf_cauchy_P` | `cauchy_cdf` |
+| `gsl_cdf_cauchy_Q` | `cauchy_survival` |
+| `gsl_cdf_cauchy_Pinv` | `cauchy_quantile` |
+| `gsl_cdf_cauchy_Qinv` | `cauchy_inverse_survival` |
+| `gsl_cdf_laplace_P` | `laplace_cdf` |
+| `gsl_cdf_laplace_Q` | `laplace_survival` |
+| `gsl_cdf_laplace_Pinv` | `laplace_quantile` |
+| `gsl_cdf_laplace_Qinv` | `laplace_inverse_survival` |
+| `gsl_cdf_rayleigh_P` | `rayleigh_cdf` |
+| `gsl_cdf_rayleigh_Q` | `rayleigh_survival` |
+| `gsl_cdf_rayleigh_Pinv` | `rayleigh_quantile` |
+| `gsl_cdf_rayleigh_Qinv` | `rayleigh_inverse_survival` |
+| `gsl_cdf_chisq_P` | `chi_squared_cdf` |
+| `gsl_cdf_chisq_Q` | `chi_squared_survival` |
+| `gsl_cdf_chisq_Pinv` | `chi_squared_quantile` |
+| `gsl_cdf_chisq_Qinv` | `chi_squared_inverse_survival` |
+| `gsl_cdf_exponential_P` | `exponential_cdf` |
+| `gsl_cdf_exponential_Q` | `exponential_survival` |
+| `gsl_cdf_exponential_Pinv` | `exponential_quantile` |
+| `gsl_cdf_exponential_Qinv` | `exponential_inverse_survival` |
+| `gsl_cdf_exppow_P` | `exponential_power_cdf` |
+| `gsl_cdf_exppow_Q` | `exponential_power_survival` |
+| `gsl_cdf_tdist_P` | `student_t_cdf` |
+| `gsl_cdf_tdist_Q` | `student_t_survival` |
+| `gsl_cdf_tdist_Pinv` | `student_t_quantile` |
+| `gsl_cdf_tdist_Qinv` | `student_t_inverse_survival` |
+| `gsl_cdf_fdist_P` | `fisher_f_cdf` |
+| `gsl_cdf_fdist_Q` | `fisher_f_survival` |
+| `gsl_cdf_fdist_Pinv` | `fisher_f_quantile` |
+| `gsl_cdf_fdist_Qinv` | `fisher_f_inverse_survival` |
+| `gsl_cdf_beta_P` | `beta_cdf` |
+| `gsl_cdf_beta_Q` | `beta_survival` |
+| `gsl_cdf_beta_Pinv` | `beta_quantile` |
+| `gsl_cdf_beta_Qinv` | `beta_inverse_survival` |
+| `gsl_cdf_flat_P` | `uniform_interval_cdf` |
+| `gsl_cdf_flat_Q` | `uniform_interval_survival` |
+| `gsl_cdf_flat_Pinv` | `uniform_interval_quantile` |
+| `gsl_cdf_flat_Qinv` | `uniform_interval_inverse_survival` |
+| `gsl_cdf_lognormal_P` | `lognormal_cdf` |
+| `gsl_cdf_lognormal_Q` | `lognormal_survival` |
+| `gsl_cdf_lognormal_Pinv` | `lognormal_quantile` |
+| `gsl_cdf_lognormal_Qinv` | `lognormal_inverse_survival` |
+| `gsl_cdf_gumbel1_P` | `gumbel_type_1_cdf` |
+| `gsl_cdf_gumbel1_Q` | `gumbel_type_1_survival` |
+| `gsl_cdf_gumbel1_Pinv` | `gumbel_type_1_quantile` |
+| `gsl_cdf_gumbel1_Qinv` | `gumbel_type_1_inverse_survival` |
+| `gsl_cdf_gumbel2_P` | `gumbel_type_2_cdf` |
+| `gsl_cdf_gumbel2_Q` | `gumbel_type_2_survival` |
+| `gsl_cdf_gumbel2_Pinv` | `gumbel_type_2_quantile` |
+| `gsl_cdf_gumbel2_Qinv` | `gumbel_type_2_inverse_survival` |
+| `gsl_cdf_weibull_P` | `weibull_cdf` |
+| `gsl_cdf_weibull_Q` | `weibull_survival` |
+| `gsl_cdf_weibull_Pinv` | `weibull_quantile` |
+| `gsl_cdf_weibull_Qinv` | `weibull_inverse_survival` |
+| `gsl_cdf_pareto_P` | `pareto_cdf` |
+| `gsl_cdf_pareto_Q` | `pareto_survival` |
+| `gsl_cdf_pareto_Pinv` | `pareto_quantile` |
+| `gsl_cdf_pareto_Qinv` | `pareto_inverse_survival` |
+| `gsl_cdf_logistic_P` | `logistic_cdf` |
+| `gsl_cdf_logistic_Q` | `logistic_survival` |
+| `gsl_cdf_logistic_Pinv` | `logistic_quantile` |
+| `gsl_cdf_logistic_Qinv` | `logistic_inverse_survival` |
+| `gsl_cdf_binomial_P` | `binomial_cdf` |
+| `gsl_cdf_binomial_Q` | `binomial_survival` |
+| `gsl_cdf_poisson_P` | `poisson_cdf` |
+| `gsl_cdf_poisson_Q` | `poisson_survival` |
+| `gsl_cdf_geometric_P` | `geometric_cdf` |
+| `gsl_cdf_geometric_Q` | `geometric_survival` |
+| `gsl_cdf_negative_binomial_P` | `negative_binomial_cdf` |
+| `gsl_cdf_negative_binomial_Q` | `negative_binomial_survival` |
+| `gsl_cdf_pascal_P` | `pascal_cdf` |
+| `gsl_cdf_pascal_Q` | `pascal_survival` |
+| `gsl_cdf_hypergeometric_P` | `hypergeometric_cdf` |
+| `gsl_cdf_hypergeometric_Q` | `hypergeometric_survival` |
+
 ## GSL references
 
 The GSL 2.8 definitions are documented in [Statistics](https://www.gnu.org/software/gsl/doc/html/statistics.html), [Running Statistics](https://www.gnu.org/software/gsl/doc/html/rstat.html), [Special Functions](https://www.gnu.org/software/gsl/doc/html/specfunc.html), [Numerical Integration](https://www.gnu.org/software/gsl/doc/html/integration.html), and [Random Number Distributions](https://www.gnu.org/software/gsl/doc/html/randist.html).

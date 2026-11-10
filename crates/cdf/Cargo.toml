@@ -1,0 +1,20 @@
+[package]
+name = "gsl-oxide-cdf"
+description = "Safe Rust cumulative distributions, survival functions, and quantiles from GSL"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+repository.workspace = true
+readme.workspace = true
+include.workspace = true
+license.workspace = true
+
+[dependencies]
+gsl-oxide-special = { path = "../special", version = "0.1.1" }
+
+[dev-dependencies]
+gsl-oxide-randist = { path = "../randist", version = "0.1.1" }
+
+[lints]
+workspace = true

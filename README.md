@@ -1,6 +1,6 @@
 # gsl-oxide
 
-Native Rust implementations of selected GNU Scientific Library (GSL) 2.8 numerical functionality: special functions, numerical integration, statistics, and random distributions. Released under **GPL-3.0-or-later**.
+Native Rust implementations of selected GNU Scientific Library (GSL) 2.8 numerical functionality: special functions, numerical integration, statistics, random distributions, and cumulative distributions. Released under **GPL-3.0-or-later**.
 
 The libraries use safe Rust and require no GSL installation or native numerical dependencies. Only a selected subset is supported; gsl-oxide is not a full GSL replacement.
 
@@ -12,6 +12,7 @@ The libraries use safe Rust and require no GSL installation or native numerical 
 | [gsl-oxide-integration](https://docs.rs/gsl-oxide-integration) | Adaptive integration over finite and infinite intervals, with breakpoints and supported endpoint singularities. |
 | [gsl-oxide-statistics](https://docs.rs/gsl-oxide-statistics) | Mean, variance, standard deviation, covariance, correlations, weighted statistics, and streaming statistics. |
 | [gsl-oxide-randist](https://docs.rs/gsl-oxide-randist) | All GSL 2.8 `randist` distributions and densities, including multivariate normal and Wishart; direction sampling, shuffling, and selection. |
+| [gsl-oxide-cdf](https://docs.rs/gsl-oxide-cdf) | All 86 GSL 2.8 `cdf` functions: continuous and discrete CDFs, survival functions, and available quantiles and inverse survival functions. |
 
 See each crate's API documentation for supported arguments, numerical limits, and error behavior.
 
@@ -27,6 +28,7 @@ gsl-oxide-special = "0.1.1"
 gsl-oxide-integration = "0.1.1"
 gsl-oxide-statistics = "0.1.1"
 gsl-oxide-randist = "0.1.1"
+gsl-oxide-cdf = "0.1.1"
 ```
 
 ```rust
@@ -56,7 +58,6 @@ For functionality outside this workspace's scope, use these libraries directly:
 | FFT | [RustFFT](https://docs.rs/rustfft/latest/rustfft/) |
 | Optimization | [argmin](https://docs.rs/argmin/latest/argmin/) |
 | Random-number generators | [rand](https://docs.rs/rand/latest/rand/) |
-| Distribution CDFs and quantiles | [statrs](https://docs.rs/statrs/latest/statrs/) |
 | Kendall rank correlation | [kendalls](https://docs.rs/kendalls/latest/kendalls/) |
 
 ## Contributing

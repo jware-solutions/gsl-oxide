@@ -66,10 +66,10 @@ pub(crate) fn log_ratio(b: f64, a: f64) -> f64 {
 
 pub(crate) fn ln_gamma1p(z: f64) -> f64 {
     // DLMF 5.7.3: log Gamma(1+z)=-Euler*z+sum (-z)^k*zeta(k)/k.
-    // |z|<=1/4; the remainder after 32 terms is < 2e-21.
+    // |z|<=1/2; the remainder after 64 terms is < 2e-21.
     let mut power = z * z;
     let mut sum = -EULER * z;
-    for k in 2..=32 {
+    for k in 2..=64 {
         sum += power * zeta(k) / f64::from(k);
         power *= -z;
     }
@@ -77,7 +77,7 @@ pub(crate) fn ln_gamma1p(z: f64) -> f64 {
 }
 
 pub(crate) fn positive_log(mut x: f64) -> f64 {
-    if (0.75..=1.25).contains(&x) {
+    if (0.5..=1.5).contains(&x) {
         return ln_gamma1p(x - 1.0);
     }
     if (1.75..=2.25).contains(&x) {

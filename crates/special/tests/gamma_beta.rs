@@ -208,7 +208,7 @@ fn beta_independent_anchors_and_extremes() {
 
 #[test]
 fn gamma_and_beta_branch_neighbors() {
-    for boundary in [0.25_f64, 0.75, 1.25, 1.75, 2.25, 16.0] {
+    for boundary in [0.25_f64, 0.5, 0.75, 1.25, 1.5, 1.75, 2.25, 16.0] {
         let center = gamma(boundary).unwrap();
         for bits in [boundary.to_bits() - 1, boundary.to_bits() + 1] {
             let x = f64::from_bits(bits);
