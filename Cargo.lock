@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "gsl-oxide-cdf"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "gsl-oxide-randist",
  "gsl-oxide-special",
@@ -12,11 +12,11 @@ dependencies = [
 
 [[package]]
 name = "gsl-oxide-integration"
-version = "0.1.1"
+version = "0.2.0"
 
 [[package]]
 name = "gsl-oxide-randist"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "gsl-oxide-integration",
  "gsl-oxide-special",
@@ -26,11 +26,11 @@ dependencies = [
 
 [[package]]
 name = "gsl-oxide-special"
-version = "0.1.1"
+version = "0.2.0"
 
 [[package]]
 name = "gsl-oxide-statistics"
-version = "0.1.1"
+version = "0.2.0"
 
 [[package]]
 name = "rand_core"

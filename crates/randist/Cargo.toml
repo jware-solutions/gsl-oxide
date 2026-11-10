@@ -11,12 +11,12 @@ include.workspace = true
 license.workspace = true
 
 [dependencies]
-gsl-oxide-special = { path = "../special", version = "0.1.1" }
+gsl-oxide-special = { path = "../special", version = "0.2.0" }
 rand_core = "0.6.4"
 
 [dev-dependencies]
-gsl-oxide-integration = { path = "../integration", version = "0.1.1" }
-gsl-oxide-statistics = { path = "../statistics", version = "0.1.1" }
+gsl-oxide-integration = { path = "../integration", version = "0.2.0" }
+gsl-oxide-statistics = { path = "../statistics", version = "0.2.0" }
 
 [lints]
 workspace = true
