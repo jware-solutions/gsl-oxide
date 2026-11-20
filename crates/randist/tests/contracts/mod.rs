@@ -149,6 +149,50 @@ fn scalar_support_and_nonfinite_observations() {
     assert_eq!(multinomial_pdf(&[0.0, 1.0], &[1, 4]), Ok(0.0));
 }
 
+/// Checks the factorial-table and log-choose cutoffs against high-precision PMFs.
+#[test]
+fn binomial_pdf_coefficient_accuracy() {
+    // Integer choose(n, k) times p^k * (1-p)^(n-k), evaluated at 90 decimal digits.
+    let n_max = f64::from(u32::MAX);
+    for (n, k, p, expected) in [
+        (170, 85, 0.5, 0.061105026407605054),
+        (171, 85, 0.5, 0.060749764626165485),
+        (1000, 100, 0.1, 0.04201679086108544),
+        (1024, 512, 0.5, 0.024927805892979545),
+        (1025, 512, 0.5, 0.024903509785871376),
+        (u32::MAX, 1, 1.0 / n_max, 0.36787944121426913),
+        (u32::MAX, 2, 2.0 / n_max, 0.27067056653624577),
+        (
+            u32::MAX,
+            u32::MAX - 2,
+            1.0 - 2.0 / n_max,
+            0.27067056653624577,
+        ),
+    ] {
+        relative(binomial_pdf(k, p, n).unwrap(), expected, 1e-12);
+    }
+}
+
+/// Checks point masses, underflow, and probability validation outside the support.
+#[test]
+fn binomial_pdf_endpoints_and_underflow() {
+    for p in [0.0, 0.5, 1.0] {
+        assert_eq!(binomial_pdf(0, p, 0), Ok(1.0));
+    }
+    for (k, p, expected) in [
+        (0, 0.0, 1.0),
+        (1, 0.0, 0.0),
+        (1, 1.0, 0.0),
+        (1000, 1.0, 1.0),
+    ] {
+        assert_eq!(binomial_pdf(k, p, 1000), Ok(expected));
+    }
+    assert_eq!(binomial_pdf(100, 0.99, 1000), Ok(0.0));
+    for p in [f64::NAN, -0.1, 1.1] {
+        assert_eq!(binomial_pdf(11, p, 10), Err(Error::Domain));
+    }
+}
+
 /// Checks that finite sums of the tested discrete PDFs equal one within tolerance.
 #[test]
 fn normalized_probability_masses() {

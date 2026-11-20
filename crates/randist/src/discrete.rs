@@ -118,6 +118,38 @@ pub(crate) fn log_choose(n: u64, k: u64) -> Result<f64, Error> {
     }
 }
 
+/// Factorials through 170!, the largest factorial representable as a finite `f64`.
+static FACTORIALS: [f64; 171] = {
+    let mut table = [1.0; 171];
+    let mut n = 2;
+    while n < table.len() {
+        table[n] = table[n - 1] * n as f64;
+        n += 1;
+    }
+    table
+};
+
+/// Evaluates ln(n!) from the factorial table or log-gamma, as in GSL's lnfact.
+fn log_factorial(n: u32) -> Result<f64, Error> {
+    match FACTORIALS.get(n as usize) {
+        Some(factorial) => Ok(factorial.ln()),
+        None => log_gamma(f64::from(n) + 1.0),
+    }
+}
+
+/// Returns ln(n choose k) for a binomial mass with `k <= n`.
+fn binomial_log_choose(n: u32, k: u32) -> Result<f64, Error> {
+    let m = k.min(n - k);
+    match m {
+        0 => Ok(0.0),
+        1 => Ok(f64::from(n).ln()),
+        // Limit cancellation in GSL's three-log-factorial formula. At 1024,
+        // the spacing between adjacent f64 values at ln(n!) is still < 1e-12.
+        _ if n <= 1024 => Ok(log_factorial(n)? - log_factorial(m)? - log_factorial(n - m)?),
+        _ => log_choose(u64::from(n), u64::from(k)),
+    }
+}
+
 /// Returns the probability of `k` successes in `trials` independent trials.
 ///
 /// The success probability `p` must lie in `[0,1]`. Returns
@@ -135,7 +167,7 @@ pub fn binomial_pdf(k: u32, p: f64, trials: u32) -> Result<f64, Error> {
         return Ok(f64::from(k == trials));
     }
     density(
-        (log_choose(u64::from(trials), u64::from(k))?
+        (binomial_log_choose(trials, k)?
             + f64::from(k) * p.ln()
             + f64::from(trials - k) * (-p).ln_1p())
         .exp(),
