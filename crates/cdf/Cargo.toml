@@ -11,10 +11,10 @@ include.workspace = true
 license.workspace = true
 
 [dependencies]
-gsl-oxide-special = { path = "../special", version = "0.2.0" }
+gsl-oxide-special = { path = "../special", version = "0.2.1" }
 
 [dev-dependencies]
-gsl-oxide-randist = { path = "../randist", version = "0.2.0" }
+gsl-oxide-randist = { path = "../randist", version = "0.2.1" }
 
 [lints]
 workspace = true
